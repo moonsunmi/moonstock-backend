@@ -1,0 +1,26 @@
+import bcrypt from 'bcrypt'
+const saltRounds = 10
+
+export const hashPasswordP = (password: string): Promise<string> =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const salt = await bcrypt.genSalt(saltRounds)
+      const hash = await bcrypt.hash(password, salt)
+      resolve(hash)
+    } catch (e) {
+      reject(e)
+    }
+  })
+
+export const comparePasswordP = (
+  password: string,
+  hashedPassword: string
+): Promise<boolean> =>
+  new Promise((resolve, reject) => {
+    try {
+      const result = bcrypt.compare(password, hashedPassword)
+      resolve(result)
+    } catch (e) {
+      reject(e)
+    }
+  })

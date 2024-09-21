@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?       @map("email_verified")
+  password      String
+  image         String?
+  holdings      Holding[]
+  transactions  Transaction[]
+ 
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Stock {
+  ticker        String          @id @db.VarChar(6)
+  name          String
+  market        String
+  holdings      Holding[]
+  transactions  Transaction[]
+
+  @@map("stocks")
+}
+
+model Holding {
+  id            String    @id @default(cuid())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String    @map("user_id")
+  stock         Stock     @relation(fields: [stockTicker], references: [ticker], onDelete: Cascade)
+  stockTicker   String    @map("stock_ticker")
+  quantity      Int
+  price         Int
+  transactAt    DateTime?
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("holdings")
+}
+
+
+model Transaction {
+  id              String        @id @default(cuid())
+  user            User          @relation(fields: [userId], references: [id])
+  userId          String        @map("user_id")
+  stock           Stock         @relation(fields: [stockTicker], references: [ticker])
+  stockTicker     String        @map("stock_ticker") 
+  quantity        Int
+  price           Int
+  type            TransactionType
+  transactionAt   DateTime?     @map("transaction_at")
+  
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime?     @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
+
+  @@map("transactions")
+}
+
+enum TransactionType {
+  BUY
+  SELL
+}
