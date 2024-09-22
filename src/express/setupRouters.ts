@@ -3,6 +3,7 @@ import * as R from '../routers/'
 
 export const setupRouters = (app: Express, ...args: any[]): Express => {
   return app
-    .use('/test', R.testRouter(...args))
     .use('/auth', R.authRouter(...args))
+    .use('/users', R.usersRouter(...args))
+    .use('/test', R.testRouter(...args))
 }

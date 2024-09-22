@@ -31,3 +31,17 @@ export const jwtVerifyP = (token: string, options: VerifyOptions = {}) =>
       reject(e)
     }
   })
+
+export const extractUserIdFromJwt = (token: string): any | null => {
+  try {
+    const decoded = verify(token, secret)
+    if (typeof decoded === 'object') {
+      const {id} = decoded
+      return id
+    }
+    return null
+  } catch (err) {
+    console.error('토큰 검증 실패:', err)
+    return null
+  }
+}

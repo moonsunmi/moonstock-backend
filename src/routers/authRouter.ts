@@ -8,7 +8,6 @@ export const authRouter = (...args: any[]) => {
   const client = new PrismaClient()
   const upload = multer()
 
-  // todo. sign-up 이후 그냥 ok만 하고, 다시 로그인하게 하는 건가?
   return router
     .post('/sign-up', upload.none(), async (req, res) => {
       try {
