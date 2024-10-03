@@ -67,6 +67,12 @@ export const authRouter = (...args: any[]) => {
           .json({ok: false, errorMessage: '비밀번호가 틀렸습니다.'})
       }
     })
+    .post('/logout', async (req, res) => {
+      res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(0)
+      })
+    })
     .post('/refreshToken', async (req, res) => {
       const {refreshToken} = req.cookies // from cookies??
       try {
