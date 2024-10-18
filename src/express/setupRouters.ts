@@ -5,5 +5,6 @@ export const setupRouters = (app: Express, ...args: any[]): Express => {
   return app
     .use('/auth', R.authRouter(...args))
     .use('/users', R.usersRouter(...args))
+    .use('/stocks', R.stockRouter(...args))
     .use('/test', R.testRouter(...args))
 }
