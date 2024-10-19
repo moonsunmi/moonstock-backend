@@ -23,7 +23,10 @@ export const usersRouter = (...args: any[]) => {
           })
         }
 
-        const result = await client.holding.findMany({where: {userId: userId}})
+        const result = await client.holding.findMany({
+          where: {userId: userId},
+          include: {stock: true}
+        })
 
         res.status(200).json({holdings: result})
       } catch (err) {
