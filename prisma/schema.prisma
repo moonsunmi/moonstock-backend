@@ -55,7 +55,6 @@ model Holding {
   @@map("holdings")
 }
 
-
 model Transaction {
   id              String        @id @default(cuid())
   user            User          @relation(fields: [userId], references: [id])
@@ -67,6 +66,10 @@ model Transaction {
   type            TransactionType
   transactionAt   DateTime?     @map("transaction_at")
   
+  matchedTransactionId String?      @unique @map("matched_transaction_id")
+  matchedTransaction   Transaction? @relation("TransactionMatch", fields: [matchedTransactionId], references: [id])
+  matchedBy Transaction?            @relation("TransactionMatch")
+
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime?     @updatedAt @map("updated_at")
   deletedAt       DateTime?     @map("deleted_at")

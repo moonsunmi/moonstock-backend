@@ -34,41 +34,45 @@ export const authRouter = (...args: any[]) => {
       }
     })
     .post('/login', upload.none(), async (req, res) => {
-      const {email, password} = req.body
-      const result = await client.user.findUnique({where: {email: email}})
+      try {
+        const {email, password} = req.body
 
-      if (!result) {
-        res.status(401).json({errorMessage: '등록되지 않은 사용자입니다.'})
-        return
-      }
+        const result = await client.user.findUnique({where: {email: email}})
 
-      const {id: _id, password: _password, ...userInfo} = result
-      const isSamePw = await U.comparePasswordP(password, result.password)
-      if (isSamePw) {
-        const token = await U.jwtSignP({id: result.id}, {expiresIn: '1m'})
-        const refreshToken = await U.jwtSignP(
-          {id: result.id},
-          {expiresIn: '7d'}
-        )
+        if (!result) {
+          res.status(401).json({errorMessage: '등록되지 않은 사용자입니다.'})
+          return
+        }
 
-        // 쿠키값이 넘어가기는 하는데,(set-cookie) 프런트에서 다시 전달하지를 못하고 있음.
-        res.cookie('refreshToken', refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV1 === 'production',
-          // sameSite:none을 쓰려면 무조건 https(secure: true)를 적용해야
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-          maxAge: 24 * 60 * 60 * 1000
-        })
-        res.status(200).json({
-          token: token,
-          userInfo: userInfo
-        })
-      } else {
-        res.status(401).json({errorMessage: '비밀번호가 틀렸습니다.'})
+        const {id: _id, password: _password, ...userInfo} = result
+        const isSamePw = await U.comparePasswordP(password, result.password)
+        if (isSamePw) {
+          const token = await U.jwtSignP({id: result.id}, {expiresIn: '1m'})
+          const refreshToken = await U.jwtSignP(
+            {id: result.id},
+            {expiresIn: '7d'}
+          )
+
+          res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV1 === 'production',
+            // sameSite:none을 쓰려면 무조건 https(secure: true)를 적용해야
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000
+          })
+          res.status(200).json({
+            token: token,
+            userInfo: userInfo
+          })
+        } else {
+          res.status(401).json({errorMessage: '비밀번호가 틀렸습니다.'})
+        }
+      } catch (e) {
+        res.status(500).json({errorMessage: '오류'})
       }
     })
     .post('/logout', async (req, res) => {
-      res.cookie('token', '', {
+      res.cookie('refreshToken', '', {
         httpOnly: true,
         expires: new Date(0)
       })

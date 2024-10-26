@@ -41,7 +41,12 @@ export const extractUserIdFromJwt = (token: string): any | null => {
     }
     return null
   } catch (err) {
-    console.error('토큰 검증 실패:', err)
+    console.log(
+      // todo. 환경에 맞춰서 에러 메시지 ?
+      process.env.NODE_ENV === 'development'
+        ? `토큰 검증 실패: ${err}`
+        : '토큰 검증 실패'
+    )
     return null
   }
 }
