@@ -47,7 +47,7 @@ export const authRouter = (...args: any[]) => {
         const {id: _id, password: _password, ...userInfo} = result
         const isSamePw = await U.comparePasswordP(password, result.password)
         if (isSamePw) {
-          const token = await U.jwtSignP({id: result.id}, {expiresIn: '1m'})
+          const token = await U.jwtSignP({id: result.id}, {expiresIn: '15m'})
           const refreshToken = await U.jwtSignP(
             {id: result.id},
             {expiresIn: '7d'}

@@ -167,7 +167,8 @@ export const usersRouter = (...args: any[]) => {
           const transactions = await client.transaction.findMany({
             where: {userId: userId},
             include: {
-              matchedTransaction: true
+              matchedTransaction: true,
+              stock: true
             }
           })
           res.status(200).json({transactions: transactions})
@@ -191,7 +192,14 @@ export const usersRouter = (...args: any[]) => {
       async (req: AuthenticatedRequest, res: Response) => {
         try {
           const userId = req.userId
-          const {stockTicker, quantity, price, type, transactionAt} = req.body
+          const {
+            stockTicker,
+            quantity,
+            price,
+            type,
+            transactedAt,
+            matchedTransaction // todo.
+          } = req.body
 
           // todo. 값에 대한 validation , error 메시지 추가해야 할 듯.
           const createdTransaction = await client.transaction.create({
@@ -202,10 +210,13 @@ export const usersRouter = (...args: any[]) => {
               stock: {
                 connect: {ticker: stockTicker}
               },
-              quantity: parseInt(quantity), // 숫자로 변환
-              price: parseInt(price), // 숫자로 변환
-              type, // BUY or SELL (TransactionType enum 값)
-              transactionAt: new Date(transactionAt) // 날짜 변환
+              quantity: parseInt(quantity),
+              price: parseInt(price),
+              type,
+              transactedAt: new Date(transactedAt)
+            },
+            include: {
+              stock: true
             }
           })
 

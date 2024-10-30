@@ -1,4 +1,4 @@
-// 실행: node seedStockListDB.mjs
+// (이 파일의 경로에서) 실행: node seedStockListDB.mjs
 
 import {PrismaClient} from '@prisma/client'
 import {parse} from 'csv-parse'

@@ -47,7 +47,7 @@ model Holding {
   stockTicker   String    @map("stock_ticker")
   quantity      Int
   price         Int
-  transactAt    DateTime?
+  transactedAt    DateTime?
 
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
@@ -64,7 +64,7 @@ model Transaction {
   quantity        Int
   price           Int
   type            TransactionType
-  transactionAt   DateTime?     @map("transaction_at")
+  transactedAt   DateTime?     @map("transacted_at")
   
   matchedTransactionId String?      @unique @map("matched_transaction_id")
   matchedTransaction   Transaction? @relation("TransactionMatch", fields: [matchedTransactionId], references: [id])
