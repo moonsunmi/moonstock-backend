@@ -8,15 +8,16 @@ const authenticateUser = (
   next: NextFunction
 ) => {
   try {
-    const token = req.headers.authorization?.split('Bearer ')[1]
+    const token = req.headers.authorization?.split(' ')[1]
+
     if (!token) {
-      return res.status(401).json({errorMessage: '로그인이 필요합니다.'})
+      return res.status(401).json({message: '로그인이 필요합니다.'})
     }
 
     const userId = extractUserIdFromJwt(token)
     if (!userId) {
-      return res.status(401).json({
-        errorMessage: '유효하지 않은 토큰입니다. 다시 로그인해 주세요.'
+      return res.status(403).json({
+        message: 'Unauthorized'
       })
     }
     req.userId = userId
