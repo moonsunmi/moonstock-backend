@@ -35,6 +35,7 @@ export const jwtVerifyP = (token: string, options: VerifyOptions = {}) =>
 export const extractUserIdFromJwt = (token: string): any | null => {
   try {
     const decoded = verify(token, secret)
+
     if (typeof decoded === 'object') {
       const {id} = decoded
       return id

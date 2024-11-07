@@ -13,8 +13,8 @@ const authenticateUser = (
     if (!token) {
       return res.status(401).json({message: '로그인이 필요합니다.'})
     }
-
     const userId = extractUserIdFromJwt(token)
+
     if (!userId) {
       return res.status(403).json({
         message: 'Unauthorized'

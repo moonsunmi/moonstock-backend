@@ -34,15 +34,15 @@ export const usersRouter = (...args: any[]) => {
             return {..._stock, ...rest}
           })
 
-          res.status(200).json({holdings: arrangedResult})
+          return res.status(200).json({holdings: arrangedResult})
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            res.json({
+            return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
           }
           console.error('알 수 없는 오류 발생:', err)
-          res.status(500).json({
+          return res.status(500).json({
             message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
           })
         }
@@ -71,15 +71,15 @@ export const usersRouter = (...args: any[]) => {
             })
           }
 
-          res.status(200).json({holding: result})
+          return res.status(200).json({holding: result})
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            res.json({
+            return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
           }
           console.error('알 수 없는 오류 발생:', err)
-          res.status(500).json({
+          return res.status(500).json({
             message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
           })
         }
@@ -93,12 +93,12 @@ export const usersRouter = (...args: any[]) => {
           const userId = req.userId
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            res.json({
+            return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
           }
           console.error('알 수 없는 오류 발생:', err)
-          res.status(500).json({
+          return res.status(500).json({
             message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
           })
         }
@@ -112,12 +112,12 @@ export const usersRouter = (...args: any[]) => {
           const userId = req.userId
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            res.json({
+            return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
           }
           console.error('알 수 없는 오류 발생:', err)
-          res.status(500).json({
+          return res.status(500).json({
             message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
           })
         }
@@ -142,12 +142,12 @@ export const usersRouter = (...args: any[]) => {
           if (result) return res.status(200).json({holdings: result})
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            res.json({
+            return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
           }
           console.error('알 수 없는 오류 발생:', err)
-          res.status(500).json({
+          return res.status(500).json({
             message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
           })
         }
@@ -167,15 +167,15 @@ export const usersRouter = (...args: any[]) => {
               stock: true
             }
           })
-          res.status(200).json({transactions: transactions})
+          return res.status(200).json({transactions: transactions})
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            res.json({
+            return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
           }
           console.error('알 수 없는 오류 발생:', err)
-          res.status(500).json({
+          return res.status(500).json({
             message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
           })
         }
@@ -198,6 +198,16 @@ export const usersRouter = (...args: any[]) => {
             })
           }
 
+          const stockRecord = await client.stock.findUnique({
+            where: {ticker: stockTicker}
+          })
+
+          if (!stockRecord) {
+            return res.status(404).json({
+              message: `${stockTicker}는 존재하지 않는 stockTicker입니다.`
+            })
+          }
+
           const createdTransaction = await client.transaction.create({
             data: {
               user: {
@@ -217,15 +227,26 @@ export const usersRouter = (...args: any[]) => {
             }
           })
 
-          res.status(201).json({transaction: createdTransaction})
+          if (matchedId) {
+            await client.transaction.update({
+              where: {id: matchedId},
+              data: {
+                matched: {connect: {id: createdTransaction.id}}
+              }
+            })
+          }
+
+          return res.status(201).json({transaction: createdTransaction})
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            res.json({
+            console.log(err)
+
+            return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
           }
           console.error('알 수 없는 오류 발생:', err)
-          res.status(500).json({
+          return res.status(500).json({
             message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
           })
         }
