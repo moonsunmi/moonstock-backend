@@ -83,7 +83,35 @@ export const usersRouter = (...args: any[]) => {
       }
     )
     .get(
-      '/transactions/',
+      '/transactions/:ticker',
+      authenticateUser,
+      async (req: AuthenticatedRequest, res: Response) => {
+        try {
+          const {userId} = req
+          const {ticker} = req.params
+
+          const transactions = await client.transaction.findMany({
+            where: {userId: userId, stockTicker: ticker},
+            include: {
+              matched: true
+            }
+          })
+          return res.status(200).json({transactions: transactions})
+        } catch (err) {
+          if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            return res.json({
+              message: '데이터베이스 오류가 발생했습니다.'
+            })
+          }
+          console.error('알 수 없는 오류 발생:', err)
+          return res.status(500).json({
+            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+          })
+        }
+      }
+    )
+    .get(
+      '/transactions/:id',
       authenticateUser,
       async (req: AuthenticatedRequest, res: Response) => {
         try {
