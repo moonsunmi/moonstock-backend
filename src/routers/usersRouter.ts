@@ -11,183 +11,13 @@ export const usersRouter = (...args: any[]) => {
   const upload = multer()
 
   return router
-    .get(
-      '/holdings',
-      authenticateUser,
-      async (req: AuthenticatedRequest, res: Response) => {
-        try {
-          const userId = req.userId
-
-          const results = await client.holding.findMany({
-            where: {userId: userId},
-            include: {stock: true}
-          })
-
-          const arrangedResult = results.map(result => {
-            const {
-              userId: _userId,
-              stockTicker: _stockTicker,
-              stock: _stock,
-              ...rest
-            } = result
-
-            return {..._stock, ...rest}
-          })
-
-          return res.status(200).json({holdings: arrangedResult})
-        } catch (err) {
-          if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            return res.json({
-              message: '데이터베이스 오류가 발생했습니다.'
-            })
-          }
-          console.error('알 수 없는 오류 발생:', err)
-          return res.status(500).json({
-            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-          })
-        }
-      }
-    )
-    .get(
-      '/holdings/:holdingId',
-      authenticateUser,
-      async (req: AuthenticatedRequest, res: Response) => {
-        try {
-          const userId = req.userId
-
-          const {holdingId} = req.params
-          if (!holdingId) {
-            return res.status(400).json({message: 'holdingId가 필요합니다.'})
-          }
-
-          const result = await client.holding.findUnique({
-            where: {id: holdingId, userId: userId},
-            include: {stock: true}
-          })
-
-          if (!result) {
-            return res.status(404).json({
-              message: '해당 주식 정보를 찾을 수 없습니다.'
-            })
-          }
-
-          return res.status(200).json({holding: result})
-        } catch (err) {
-          if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            return res.json({
-              message: '데이터베이스 오류가 발생했습니다.'
-            })
-          }
-          console.error('알 수 없는 오류 발생:', err)
-          return res.status(500).json({
-            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-          })
-        }
-      }
-    )
-    .post(
-      '/holdings/:holdingId',
-      authenticateUser,
-      async (req: AuthenticatedRequest, res: Response) => {
-        try {
-          const userId = req.userId
-        } catch (err) {
-          if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            return res.json({
-              message: '데이터베이스 오류가 발생했습니다.'
-            })
-          }
-          console.error('알 수 없는 오류 발생:', err)
-          return res.status(500).json({
-            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-          })
-        }
-      }
-    )
-    .put(
-      '/holdings/:holdingId',
-      authenticateUser,
-      async (req: AuthenticatedRequest, res: Response) => {
-        try {
-          const userId = req.userId
-        } catch (err) {
-          if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            return res.json({
-              message: '데이터베이스 오류가 발생했습니다.'
-            })
-          }
-          console.error('알 수 없는 오류 발생:', err)
-          return res.status(500).json({
-            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-          })
-        }
-      }
-    )
-    .delete(
-      '/holdings/:holdingId',
-      authenticateUser,
-      async (req: AuthenticatedRequest, res: Response) => {
-        try {
-          const userId = req.userId
-
-          const {holdingId} = req.params
-          if (!holdingId) {
-            return res.status(400).json({message: 'holdingId가 필요합니다.'})
-          }
-
-          const result = await client.holding.delete({
-            where: {id: holdingId, userId: userId}
-          })
-
-          if (result) return res.status(200).json({holdings: result})
-        } catch (err) {
-          if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            return res.json({
-              message: '데이터베이스 오류가 발생했습니다.'
-            })
-          }
-          console.error('알 수 없는 오류 발생:', err)
-          return res.status(500).json({
-            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-          })
-        }
-      }
-    )
-    .get(
-      '/transactions',
-      authenticateUser,
-      async (req: AuthenticatedRequest, res: Response) => {
-        try {
-          const userId = req.userId
-
-          const transactions = await client.transaction.findMany({
-            where: {userId: userId},
-            include: {
-              matched: true,
-              stock: true
-            }
-          })
-          return res.status(200).json({transactions: transactions})
-        } catch (err) {
-          if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            return res.json({
-              message: '데이터베이스 오류가 발생했습니다.'
-            })
-          }
-          console.error('알 수 없는 오류 발생:', err)
-          return res.status(500).json({
-            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-          })
-        }
-      }
-    )
     .post(
       '/transactions',
       upload.none(),
       authenticateUser,
       async (req: AuthenticatedRequest, res: Response) => {
         try {
-          const userId = req.userId
+          const {userId} = req
           const {stockTicker, quantity, price, type, transactedAt, matchedId} =
             req.body
 
@@ -208,7 +38,7 @@ export const usersRouter = (...args: any[]) => {
             })
           }
 
-          const createdTransaction = await client.transaction.create({
+          const created = await client.transaction.create({
             data: {
               user: {
                 connect: {id: userId}
@@ -231,16 +61,124 @@ export const usersRouter = (...args: any[]) => {
             await client.transaction.update({
               where: {id: matchedId},
               data: {
-                matched: {connect: {id: createdTransaction.id}}
+                matched: {connect: {id: created.id}}
               }
             })
           }
 
-          return res.status(201).json({transaction: createdTransaction})
+          return res.status(201).json({transaction: created})
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
             console.log(err)
 
+            return res.json({
+              message: '데이터베이스 오류가 발생했습니다.'
+            })
+          }
+          console.error('알 수 없는 오류 발생:', err)
+          return res.status(500).json({
+            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+          })
+        }
+      }
+    )
+    .get(
+      '/transactions/',
+      authenticateUser,
+      async (req: AuthenticatedRequest, res: Response) => {
+        try {
+          const {userId} = req
+
+          const transactions = await client.transaction.findMany({
+            where: {userId: userId},
+            include: {
+              matched: true,
+              stock: true
+            }
+          })
+          return res.status(200).json({transactions: transactions})
+        } catch (err) {
+          if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            return res.json({
+              message: '데이터베이스 오류가 발생했습니다.'
+            })
+          }
+          console.error('알 수 없는 오류 발생:', err)
+          return res.status(500).json({
+            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+          })
+        }
+      }
+    )
+    .put(
+      '/transactions/:id',
+      upload.none(),
+      authenticateUser,
+      async (req: AuthenticatedRequest, res: Response) => {
+        try {
+          const {userId} = req
+
+          const {id} = req.params
+          const {quantity, price, transactedAt, ...rest} = req.body
+
+          console.log('req:', req)
+
+          if (Object.keys(rest).length > 0) {
+            return res.status(400).json({
+              message: `${Object.keys(rest).join(
+                ', '
+              )}는 수정할 수 없습니다. 수정 가능한 항목: quantity, price, transactedAt`
+            })
+          }
+
+          const updated = await client.transaction.update({
+            where: {
+              userId: userId,
+              id: id
+            },
+            data: {
+              quantity: quantity != null ? parseInt(quantity) : undefined,
+              price: price != null ? parseInt(price) : undefined,
+              transactedAt:
+                transactedAt != null ? new Date(transactedAt) : undefined
+            }
+          })
+
+          return res.status(200).json({transaction: updated})
+        } catch (err) {
+          if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            console.log(err)
+
+            return res.json({
+              message: '데이터베이스 오류가 발생했습니다.'
+            })
+          }
+          console.error('알 수 없는 오류 발생:', err)
+          return res.status(500).json({
+            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+          })
+        }
+      }
+    )
+    .delete(
+      '/transactions/:id',
+      authenticateUser,
+      async (req: AuthenticatedRequest, res: Response) => {
+        try {
+          const {userId} = req
+
+          const {id} = req.params
+          if (!id) {
+            return res.status(400).json({message: 'id 필요합니다.'})
+          }
+
+          const deleted = await client.holding.delete({
+            where: {id: id, userId: userId}
+          })
+
+          if (deleted) return res.status(200).json({transaction: deleted})
+        } catch (err) {
+          if (err instanceof Prisma.PrismaClientKnownRequestError) {
             return res.json({
               message: '데이터베이스 오류가 발생했습니다.'
             })
