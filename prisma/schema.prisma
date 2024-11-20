@@ -64,17 +64,35 @@ model Transaction {
   quantity        Int
   price           Int
   type            TransactionType
-  transactedAt   DateTime?      @map("transacted_at")
+  transactedAt    DateTime?      @map("transacted_at")
   
-  matchedId String?             @unique @map("matched_id")
-  matched   Transaction?        @relation("Match", fields: [matchedId], references: [id])
-  matchedBy Transaction?        @relation("Match")
+  matchedId       String?       @unique @map("matched_id")
+  matched         Transaction?  @relation("Match", fields: [matchedId], references: [id])
+  matchedBy       Transaction?  @relation("Match")
+
+  profitAsBuy     Profit?       @relation("BuyTransaction") // buyTransaction과 연결
+  profitAsSell    Profit?       @relation("SellTransaction") // sellTransaction과 연결
 
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime?     @updatedAt @map("updated_at")
   deletedAt       DateTime?     @map("deleted_at")
 
   @@map("transactions")
+}
+
+model Profit {
+  id                String         @id @default(cuid())
+  buyTransaction    Transaction    @relation("BuyTransaction", fields: [buyTransactionId], references: [id], onDelete: Cascade)
+  buyTransactionId  String         @unique @map("buy_transaction_id")
+  sellTransaction   Transaction    @relation("SellTransaction", fields: [sellTransactionId], references: [id], onDelete: Cascade)
+  sellTransactionId String         @unique @map("sell_transaction_id")
+
+  
+  
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  @@map("profits")
 }
 
 enum TransactionType {
