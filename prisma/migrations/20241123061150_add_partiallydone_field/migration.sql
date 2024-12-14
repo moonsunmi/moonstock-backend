@@ -1,0 +1,12 @@
+-- CreateEnum
+CREATE TYPE "TransactionStatus" AS ENUM ('INIT', 'BUY', 'SELL', 'DONE');
+
+-- AlterTable
+ALTER TABLE "transactions" ADD COLUMN     "partiallyDone" "TransactionStatus" NOT NULL DEFAULT 'INIT',
+ALTER COLUMN "buy_price" SET DATA TYPE DOUBLE PRECISION,
+ALTER COLUMN "profit" SET DATA TYPE DOUBLE PRECISION,
+ALTER COLUMN "rateOfProfit" SET DATA TYPE DOUBLE PRECISION,
+ALTER COLUMN "sell_price" SET DATA TYPE DOUBLE PRECISION;
+
+-- DropEnum
+DROP TYPE "TransactionType";

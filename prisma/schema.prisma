@@ -46,18 +46,17 @@ model Transaction {
   userId            String     @map("user_id")
   
   quantity          Int        @map("quantity")
-  profit            Int?
+  profit            Float?
   duration          Int?
-  rateOfProfit      Int?
+  rateOfProfit      Float?
   rateOfProfitYear  Int?
 
-  // 매수 관련 정보
   buyCreatedAt      DateTime?  @map("buy_created_at")
-  buyPrice          Int?       @map("buy_price")
-  
-  // 매도 관련 정보
+  buyPrice          Float?     @map("buy_price")
   sellCreatedAt     DateTime?  @map("sell_created_at")
-  sellPrice         Int?       @map("sell_price")
+  sellPrice         Float?     @map("sell_price")
+
+  partiallyDone     TransactionStatus
   
   createdAt         DateTime   @default(now()) @map("created_at")
   updatedAt         DateTime   @updatedAt @map("updated_at")
@@ -65,7 +64,8 @@ model Transaction {
   @@map("transactions")
 }
 
-enum TransactionType {
+enum TransactionStatus {
   BUY
   SELL
+  DONE
 }

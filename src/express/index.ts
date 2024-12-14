@@ -2,9 +2,12 @@ import express from 'express'
 import cors from 'cors'
 import {setupRouters} from './setupRouters'
 import cookieParser from 'cookie-parser'
+import bodyParser from 'body-parser'
 
 export const createExpressApp = (...args: any[]) => {
   const app = express()
+  var multer = require('multer')
+  var upload = multer()
 
   app
     .use((req, res, next) => {
@@ -13,8 +16,8 @@ export const createExpressApp = (...args: any[]) => {
       next()
     })
     .use(cookieParser())
-    .use(express.static('public'))
     .use(express.json())
+    .use(express.static('public'))
     .use(
       cors({
         origin: 'http://localhost:3000',
