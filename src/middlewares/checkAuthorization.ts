@@ -14,14 +14,12 @@ const checkAuthorization = async (
 
     const parsedMatchIds = JSON.parse(matchIds)
 
-    console.log('arsed', parsedMatchIds)
     const transactions = await client.transaction.findMany({
       where: {
         id: {in: parsedMatchIds}
       }
     })
 
-    console.log('trasnactions', transactions)
     if (transactions.length !== parsedMatchIds.length) {
       return res.status(403).json({
         errorCode: 'ERROR_CODE_UNAUTHORIZED',
