@@ -22,7 +22,7 @@ const checkAuthorization = async (
 
     if (transactions.length !== parsedMatchIds.length) {
       return res.status(403).json({
-        errorCode: 'ERROR_CODE_UNAUTHORIZED',
+        errorCode: 'ERROR_CODE_NOT_EXIST',
         message: '존재하지 않는 거래 ID가 포함되어 있습니다.'
       })
     }

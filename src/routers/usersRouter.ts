@@ -218,6 +218,9 @@ export const usersRouter = (...args: any[]) => {
               userId: userId,
               stockTicker: ticker,
               partiallyDone: TransactionStatus.DONE
+            },
+            orderBy: {
+              sellCreatedAt: 'desc'
             }
           })
           const total = transactions.reduce(
@@ -250,11 +253,18 @@ export const usersRouter = (...args: any[]) => {
       authenticateUser,
       async (req: AuthenticatedRequest, res: Response) => {
         try {
+          const {userId} = req
           const {id} = req.params
 
           const transaction = await client.transaction.findUnique({
             where: {id}
           })
+          if (transaction?.userId !== userId) {
+            res.status(403).json({
+              errorCode: 'ERROR_CODE_UNAUTHORIZED',
+              message: '접근 권한이 없습니다.'
+            })
+          }
           return res.status(200).json({transaction: transaction})
         } catch (err) {
           if (err instanceof Prisma.PrismaClientKnownRequestError) {

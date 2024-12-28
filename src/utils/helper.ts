@@ -12,5 +12,11 @@ export const getOpposite = (
 }
 
 export const getDuration = (start: Date, end: Date) => {
-  return Math.abs(start.getTime() - end.getTime()) / 1000 / 60 / 60 / 24
+  return (
+    (Math.abs(start.getTime() - end.getTime()) + 24 * 60 * 60 * 1000) /
+    1000 /
+    60 /
+    60 /
+    24
+  )
 }
