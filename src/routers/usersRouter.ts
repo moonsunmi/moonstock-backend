@@ -422,13 +422,60 @@ export const usersRouter = (...args: any[]) => {
       }
     )
     .put(
-      // 이미 기록된 거래 정보가 잘못되었을 경우 수정하는 것
       '/transactions/:id',
       upload.none(),
       authenticateUser,
       checkAuthorization,
       async (req: AuthenticatedRequest, res: Response) => {
-        return res.status(200).json({message: 'transactions/:id called'})
+        try {
+          const {userId} = req
+          const {id} = req.params
+
+          const {quantity, buyPrice, sellPrice} = req.body
+          const data = {
+            quantity: parseFloat(quantity),
+            buyPrice: parseFloat(buyPrice),
+            sellPrice: parseFloat(sellPrice)
+          }
+
+          if (!data.quantity || data.quantity <= 0) {
+            return res
+              .status(400)
+              .json({message: '거래 수량은 1 이상이어야 합니다.'})
+          }
+
+          if (data.buyPrice && data.buyPrice < 0) {
+            return res
+              .status(400)
+              .json({message: '구매 가격은 0보다 커야 합니다.'})
+          }
+
+          if (data.sellPrice && data.sellPrice < 0) {
+            return res
+              .status(400)
+              .json({message: '판매 가격은 0보다 커야 합니다.'})
+          }
+
+          const updated = await client.transaction.update({
+            where: {id},
+            data: {
+              ...data
+            }
+          })
+          return res.status(201).json({transaction: updated})
+        } catch (err) {
+          if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            console.log(err)
+
+            return res.json({
+              message: '데이터베이스 오류가 발생했습니다.'
+            })
+          }
+          console.error('알 수 없는 오류 발생:', err)
+          return res.status(500).json({
+            message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+          })
+        }
       }
     )
     .delete(

@@ -10,8 +10,30 @@ const checkAuthorization = async (
   try {
     const client = new PrismaClient()
     const {userId} = req // type?
-    const {matchIds} = req.body
 
+    /// --- param's id --- ///
+    const {id} = req.params
+
+    const existingTransaction = await client.transaction.findUnique({
+      where: {id}
+    })
+
+    if (!existingTransaction) {
+      return res.status(403).json({
+        errorCode: 'ERROR_CODE_NOT_EXIST',
+        message: '존재하지 않는 거래 ID가 포함되어 있습니다.'
+      })
+    }
+
+    if (existingTransaction.userId !== userId) {
+      return res.status(403).json({
+        errorCode: 'ERROR_CODE_UNAUTHORIZED',
+        message: '권한이 없는 거래가 포함되어 있습니다.'
+      })
+    }
+
+    /// ---- matchIds ---- ///
+    const {matchIds} = req.body
     const parsedMatchIds = JSON.parse(matchIds)
 
     const transactions = await client.transaction.findMany({
