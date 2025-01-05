@@ -1,4 +1,5 @@
 import {TransactionStatus} from '@prisma/client'
+import {CustomError} from '../errors/CustomError'
 
 export const getOpposite = (
   type: TransactionStatus

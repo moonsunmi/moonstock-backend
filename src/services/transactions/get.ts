@@ -1,14 +1,14 @@
 import {PrismaClient, TransactionStatus} from '@prisma/client'
 import {CustomError} from '../../errors/CustomError'
-
-const client = new PrismaClient()
+import client from '../../../prisma/db'
+import {ERROR_CODES} from '../../utils/constants'
 
 export const getTransactionById = async (id: string, userId: string) => {
   const transaction = await client.transaction.findUnique({
     where: {id}
   })
   if (transaction?.userId !== userId) {
-    throw new CustomError('접근 권한이 없습니다.', 'ERROR_CODE_UNAUTHORIZED')
+    throw new CustomError('접근 권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
   }
   return {transaction}
 }
@@ -24,7 +24,7 @@ export const getTransactionsByTicker = async (
   if (!stock) {
     throw new CustomError(
       `${ticker}는 존재하지 않는 stockTicker입니다.`,
-      'ERROR_CODE_STOCK_NOT_FOUND'
+      ERROR_CODES.NOT_EXIST
     )
   }
 
@@ -55,7 +55,7 @@ export const getCompletedTransactionsByTicker = async (
   if (!stock) {
     throw new CustomError(
       `${ticker}는 존재하지 않는 stockTicker입니다.`,
-      'ERROR_CODE_STOCK_NOT_FOUND'
+      ERROR_CODES.NOT_EXIST
     )
   }
 

@@ -1,8 +1,7 @@
-import {PrismaClient} from '@prisma/client'
 import {AuthenticatedRequest} from '../../types'
 import {CustomError} from '../../errors/CustomError'
-
-const client = new PrismaClient()
+import client from '../../../prisma/db'
+import {ERROR_CODES} from '../../utils/constants'
 
 export const createTransactionService = async (req: AuthenticatedRequest) => {
   const {userId} = req
@@ -25,7 +24,7 @@ export const createTransactionService = async (req: AuthenticatedRequest) => {
     if (!stockTicker || !quantity || !buyPrice || !buyCreatedAt || !type) {
       throw new CustomError(
         '매수 필수 값이 누락되었습니다. (필수: stockTicker, quantity, buyPrice, buyCreatedAt)',
-        'ERROR_CODE_MISSING_VALUE'
+        ERROR_CODES.MISSING_VALUE
       )
     }
     data = {
@@ -38,7 +37,7 @@ export const createTransactionService = async (req: AuthenticatedRequest) => {
     if (!stockTicker || !quantity || !sellPrice || !sellCreatedAt || !type) {
       throw new CustomError(
         '매도 필수 값이 누락되었습니다. (필수: stockTicker, quantity, sellPrice, sellCreatedAt)',
-        'ERROR_CODE_MISSING_VALUE'
+        ERROR_CODES.MISSING_VALUE
       )
     }
     data = {
@@ -50,7 +49,7 @@ export const createTransactionService = async (req: AuthenticatedRequest) => {
   } else {
     throw new CustomError(
       `${type}은 유효하지 않은 type입니다. (buy or sell)`,
-      'ERROR_CODE_TYPE_INVALID'
+      ERROR_CODES.INVALID_TYPE
     )
   }
 
@@ -61,7 +60,7 @@ export const createTransactionService = async (req: AuthenticatedRequest) => {
   if (!stockRecord) {
     throw new CustomError(
       `${stockTicker}는 존재하지 않는 stockTicker입니다.`,
-      'ERROR_CODE_STOCK_NOT_FOUND'
+      ERROR_CODES.NOT_EXIST
     )
   }
 
