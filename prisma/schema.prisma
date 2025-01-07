@@ -20,8 +20,9 @@ model User {
   emailVerified DateTime?       @map("email_verified")
   password      String
   image         String?
-  transactions  Transaction[]
- 
+
+  buyTransactions  BuyTransaction[]
+  
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
 
@@ -32,40 +33,38 @@ model Stock {
   ticker        String          @id @db.VarChar(6)
   name          String
   market        String
-  transactions  Transaction[]
+
+  buyTransactions  BuyTransaction[]
 
   @@map("stocks")
 }
 
-model Transaction {
-  id                String     @id @default(cuid())
-  
-  stock             Stock      @relation(fields: [stockTicker],references: [ticker], onDelete: Cascade)
-  stockTicker       String     @map("stock_ticker")
+model BuyTransaction {
+  id                String    @id @default(cuid())
+  stockTicker       String
+  userId            String
+  quantity          Int
+  buyPrice          Float
+  buyCreatedAt      DateTime
+
   user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String     @map("user_id")
-  
-  quantity          Int        @map("quantity")
-  profit            Float?
-  duration          Int?
-  rateOfProfit      Float?
-  rateOfProfitYear  Int?
+  stock             Stock      @relation(fields: [stockTicker], references: [ticker], onDelete: Cascade)
+  sellTransactions  SellTransaction[]
 
-  buyCreatedAt      DateTime?  @map("buy_created_at")
-  buyPrice          Float?     @map("buy_price")
-  sellCreatedAt     DateTime?  @map("sell_created_at")
-  sellPrice         Float?     @map("sell_price")
-
-  partiallyDone     TransactionStatus
-  
-  createdAt         DateTime   @default(now()) @map("created_at")
-  updatedAt         DateTime   @updatedAt @map("updated_at")
-
-  @@map("transactions")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
-enum TransactionStatus {
-  BUY
-  SELL
-  DONE
+// user와 필요할까?
+model SellTransaction {
+  id                String    @id @default(cuid())
+  buyId             String
+  quantity          Int
+  sellPrice         Float
+  sellCreatedAt     DateTime
+
+  buyTransaction    BuyTransaction @relation(fields: [buyId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }

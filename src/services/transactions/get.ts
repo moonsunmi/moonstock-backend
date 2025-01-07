@@ -1,19 +1,19 @@
-import {PrismaClient, TransactionStatus} from '@prisma/client'
+import {PrismaClient} from '@prisma/client'
 import {CustomError} from '../../errors/CustomError'
 import client from '../../../prisma/db'
 import {ERROR_CODES} from '../../utils/constants'
 
-export const getTransactionById = async (id: string, userId: string) => {
-  const transaction = await client.transaction.findUnique({
-    where: {id}
-  })
-  if (transaction?.userId !== userId) {
-    throw new CustomError('접근 권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
-  }
-  return {transaction}
+export const getTransactionByIdService = async (id: string, userId: string) => {
+  //   const transaction = await client.transaction.findUnique({
+  //     where: {id}
+  //   })
+  //   if (transaction?.userId !== userId) {
+  //     throw new CustomError('접근 권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
+  //   }
+  //   return {transaction}
 }
 
-export const getTransactionsByTicker = async (
+export const getActiveTransactionsByTickerService = async (
   ticker: string,
   userId: string
 ) => {
@@ -28,15 +28,35 @@ export const getTransactionsByTicker = async (
     )
   }
 
-  const transactions = await client.transaction.findMany({
+  const transactions = await client.buyTransaction.findMany({
     where: {
       userId,
-      stockTicker: ticker,
-      OR: [{partiallyDone: 'BUY'}, {partiallyDone: 'SELL'}]
+      stockTicker: ticker
+    },
+    include: {
+      sellTransactions: true
+    },
+    orderBy: {
+      buyCreatedAt: 'desc'
     }
   })
 
-  return {stock, transactions}
+  const activeTransactions = transactions
+    .map(txn => {
+      const soldQuantity = txn.sellTransactions.reduce(
+        (acc, sellTxn) => acc + sellTxn.quantity,
+        0
+      )
+      return {
+        id: txn.id,
+        quantity: txn.quantity - soldQuantity,
+        price: txn.buyPrice,
+        createdAt: txn.buyCreatedAt
+      }
+    })
+    .filter(tnx => tnx.quantity > 0)
+
+  return {stock, transactions: activeTransactions}
 }
 
 interface TransactionTotal {
@@ -44,10 +64,11 @@ interface TransactionTotal {
   quantity: number
 }
 
-export const getCompletedTransactionsByTicker = async (
+export const getClosedTransactionsByTicker = async (
   ticker: string,
   userId: string
 ) => {
+  // 하단 부분 middleware로 해야 할 듯.
   const stock = await client.stock.findUnique({
     where: {ticker}
   })
@@ -59,26 +80,47 @@ export const getCompletedTransactionsByTicker = async (
     )
   }
 
-  const transactions = await client.transaction.findMany({
+  const transactions = await client.buyTransaction.findMany({
     where: {
       userId,
-      stockTicker: ticker,
-      partiallyDone: TransactionStatus.DONE
+      stockTicker: ticker
+    },
+    include: {
+      sellTransactions: true
     },
     orderBy: {
-      sellCreatedAt: 'desc'
+      buyCreatedAt: 'desc'
     }
   })
 
-  const total = transactions.reduce<TransactionTotal>(
-    (acc, transaction) => ({
-      profit:
-        acc.profit +
-        (transaction.profit ? transaction.profit * transaction.quantity : 0),
-      quantity: acc.quantity + transaction.quantity
-    }),
-    {profit: 0, quantity: 0}
-  )
+  const closedTransactions = transactions.map(txn => {
+    const soldQuantity = txn.sellTransactions.reduce(
+      (acc, sellTxn) => acc + sellTxn.quantity,
+      0
+    )
+    return {
+      id: txn.id,
+      quantity: soldQuantity,
+      price: txn.buyPrice,
+      createdAt: txn.buyCreatedAt,
+      sellTransactions: txn.sellTransactions.map(sellTxn => ({
+        id: sellTxn.id,
+        quantity: sellTxn.quantity,
+        price: sellTxn.sellPrice,
+        createdAt: sellTxn.sellCreatedAt
+      }))
+    }
+  })
 
-  return {stock, total, transactions}
+  // const total = transactions.reduce<TransactionTotal>(
+  //   (acc, transaction) => ({
+  //     profit:
+  //       acc.profit +
+  //       (transaction.profit ? transaction.profit * transaction.quantity : 0),
+  //     quantity: acc.quantity + transaction.quantity
+  //   }),
+  //   {profit: 0, quantity: 0}
+  // )
+
+  return {stock, transactions: closedTransactions}
 }

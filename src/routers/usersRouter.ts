@@ -1,5 +1,5 @@
 import {Response, Router} from 'express'
-import {Prisma, PrismaClient, TransactionStatus} from '@prisma/client'
+import {Prisma, PrismaClient} from '@prisma/client'
 import multer from 'multer'
 
 import {AuthenticatedRequest} from '../types'
@@ -18,7 +18,7 @@ export const usersRouter = (...args: any[]) => {
       try {
         const {userId} = req
 
-        const holdings = await client.transaction.findMany({
+        const holdings = await client.buyTransaction.findMany({
           where: {userId: userId},
           distinct: ['stockTicker'],
           select: {stock: true}
