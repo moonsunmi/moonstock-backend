@@ -10,6 +10,10 @@ import {
   createBuyTransactionService,
   createSellTransactionService
 } from '../services/transactions/create'
+import {
+  updateBuyTransactionById,
+  updateSellTransactionById
+} from '../services/transactions/update'
 // import {
 //   matchTransactionsService,
 //   updateTransactionById
@@ -138,53 +142,51 @@ export const getClosedTransactions = async (
   }
 }
 
-// export const matchTransaction = async (
-//   req: AuthenticatedRequest,
-//   res: Response
-// ) => {
-//   try {
-//     const result = await matchTransactionsService(req)
+export const updateBuyTransaction = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const {id} = req.params
+    const result = await updateBuyTransactionById(id, req)
+    return res.status(200).json(result)
+  } catch (err) {
+    if (err instanceof CustomError) {
+      return res.status(400).json({
+        errorCode: err.errorCode,
+        message: err.message
+      })
+    }
+    console.error('알 수 없는 오류 발생:', err)
+    return res.status(500).json({
+      errorCode: 'ERROR_CODE_SERVER_ERROR',
+      message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+    })
+  }
+}
 
-//     return res.status(200).json(result)
-//   } catch (err) {
-//     if (err instanceof CustomError) {
-//       return res.status(400).json({
-//         errorCode: err.errorCode,
-//         message: err.message
-//       })
-//     }
-//     console.error('알 수 없는 오류 발생:', err)
-//     return res.status(500).json({
-//       errorCode: 'ERROR_CODE_SERVER_ERROR',
-//       message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-//     })
-//   }
-// }
-
-// export const postTransaction = async (
-//   req: AuthenticatedRequest,
-//   res: Response
-// ) => {
-//   try {
-//     const {id} = req.params
-//     const result = await updateTransactionById(id, req)
-
-//     return res.status(200).json(result)
-//   } catch (err) {
-//     if (err instanceof CustomError) {
-//       return res.status(400).json({
-//         errorCode: err.errorCode,
-//         message: err.message
-//       })
-//     }
-//     console.error('알 수 없는 오류 발생:', err)
-//     return res.status(500).json({
-//       errorCode: 'ERROR_CODE_SERVER_ERROR',
-//       message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-//     })
-//   }
-// }
-
+export const updateSellTransaction = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const {id} = req.params
+    const result = await updateSellTransactionById(id, req)
+    return res.status(200).json(result)
+  } catch (err) {
+    if (err instanceof CustomError) {
+      return res.status(400).json({
+        errorCode: err.errorCode,
+        message: err.message
+      })
+    }
+    console.error('알 수 없는 오류 발생:', err)
+    return res.status(500).json({
+      errorCode: 'ERROR_CODE_SERVER_ERROR',
+      message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+    })
+  }
+}
 // export const deleteTransaction = async (
 //   req: AuthenticatedRequest,
 //   res: Response

@@ -12,7 +12,9 @@ import {
   // deleteTransaction,
   getActiveTransactionsByTicker,
   getClosedTransactions,
-  getTransaction
+  getTransaction,
+  updateBuyTransaction,
+  updateSellTransaction
   // matchTransaction,
   // postTransaction
 } from '../controllers/transactionsControllers'
@@ -27,6 +29,7 @@ import {
 
 // DELETE /transactions/buy/{buyTransactionId}
 // 설명: 특정 매수 트랜잭션을 삭제합니다.
+////// ======> 매수 중에서 거래가 된 게 있다면 삭제 불가능함.
 
 // GET /transactions/buy/{buyTransactionId}/sell
 // 설명: 특정 매수 트랜잭션에 관련된 모든 매도 트랜잭션을 조회합니다.
@@ -65,28 +68,28 @@ export const transactionsRouter = (...args: any[]) => {
 
   router.post('/buy', upload.none(), authenticateUser, createBuyTransaction)
   router.post(
-    '/:id/sell',
+    '/:buyId/sell',
     upload.none(),
     authenticateUser,
     createSellTransaction
   )
   router.get('/:ticker/active', authenticateUser, getActiveTransactionsByTicker)
   router.get('/:ticker/closed', authenticateUser, getClosedTransactions)
-  // router.get('/:id', authenticateUser, getTransaction)
-  // router.patch(
-  //   '/match',
-  //   upload.none(),
-  //   authenticateUser,
-  //   // checkAuthorization,
-  //   matchTransaction
-  // )
-  // router.put(
-  //   '/:id',
-  //   upload.none(),
-  //   authenticateUser,
-  //   // checkAuthorization,
-  //   postTransaction
-  // )
+  router.get('/:id', authenticateUser, getTransaction)
+  router.put(
+    '/buy/:id',
+    upload.none(),
+    authenticateUser,
+    // checkAuthorization,
+    updateBuyTransaction
+  )
+  router.put(
+    '/sell/:id',
+    upload.none(),
+    authenticateUser,
+    // checkAuthorization,
+    updateSellTransaction
+  )
   // router.delete(
   //   '/:id',
   //   authenticateUser,

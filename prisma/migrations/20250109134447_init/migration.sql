@@ -29,6 +29,8 @@ CREATE TABLE "BuyTransaction" (
     "quantity" INTEGER NOT NULL,
     "buyPrice" DOUBLE PRECISION NOT NULL,
     "buyCreatedAt" TIMESTAMP(3) NOT NULL,
+    "remainingQuantity" INTEGER NOT NULL DEFAULT 0,
+    "profit" DOUBLE PRECISION DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

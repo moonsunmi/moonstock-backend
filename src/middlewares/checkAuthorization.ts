@@ -21,7 +21,7 @@
 
 //       if (!existingTransaction) {
 //         return res.status(403).json({
-//           errorCode: 'ERROR_CODE_NOT_EXIST',
+//           errorCode: 'ERROR_CODE_NOT_FOUND',
 //           message: '존재하지 않는 거래 ID가 포함되어 있습니다.'
 //         })
 //       }
@@ -47,7 +47,7 @@
 
 //     //   if (transactions.length !== parsedMatchIds.length) {
 //     //     return res.status(403).json({
-//     //       errorCode: 'ERROR_CODE_NOT_EXIST',
+//     //       errorCode: 'ERROR_CODE_NOT_FOUND',
 //     //       message: '존재하지 않는 거래 ID가 포함되어 있습니다.'
 //     //     })
 //     //   }

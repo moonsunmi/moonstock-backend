@@ -8,19 +8,19 @@ export const createBuyTransactionService = async (
   req: AuthenticatedRequest
 ) => {
   const {userId} = req
-  const {stockTicker, quantity, buyPrice, buyCreatedAt} = req.body
+  const {stockTicker, quantity, price, createdAt} = req.body
 
   let data
-  if (!stockTicker || !quantity || !buyPrice || !buyCreatedAt) {
+  if (!stockTicker || !quantity || !price || !createdAt) {
     throw new CustomError(
-      '매수 필수 값이 누락되었습니다. (필수: stockTicker, quantity, buyPrice, buyCreatedAt)',
+      `${data}에 매수 필수 값이 누락되었습니다. (필수: stockTicker, quantity, price, createdAt)`,
       ERROR_CODES.MISSING_VALUE
     )
   }
   data = {
     quantity: parseInt(quantity),
-    buyPrice: parseFloat(buyPrice),
-    buyCreatedAt: new Date(buyCreatedAt)
+    buyPrice: parseFloat(price),
+    buyCreatedAt: new Date(createdAt)
   }
 
   const stockRecord = await client.stock.findUnique({
@@ -30,7 +30,7 @@ export const createBuyTransactionService = async (
   if (!stockRecord) {
     throw new CustomError(
       `${stockTicker}는 존재하지 않는 stockTicker입니다.`,
-      ERROR_CODES.NOT_EXIST
+      ERROR_CODES.NOT_FOUND
     )
   }
 
@@ -60,24 +60,24 @@ export const createSellTransactionService = async (
   req: AuthenticatedRequest
 ) => {
   const {userId} = req
-  const {id} = req.params
-  const {quantity, sellPrice, sellCreatedAt} = req.body
+  const {buyId} = req.params
+  const {quantity, price, createdAt} = req.body
 
   let data
-  if (!quantity || !sellPrice || !sellCreatedAt) {
+  if (!quantity || !price || !createdAt) {
     throw new CustomError(
-      '매도 필수 값이 누락되었습니다. (필수: stockTicker, quantity, sellPrice, sellCreatedAt)',
+      '매도 필수 값이 누락되었습니다. (필수: stockTicker, quantity, price, createdAt)',
       ERROR_CODES.MISSING_VALUE
     )
   }
   data = {
     quantity: parseInt(quantity),
-    sellPrice: parseFloat(sellPrice),
-    sellCreatedAt: new Date(sellCreatedAt)
+    sellPrice: parseFloat(price),
+    sellCreatedAt: new Date(createdAt)
   }
 
   const buyTransaction = await client.buyTransaction.findUnique({
-    where: {id},
+    where: {id: buyId},
     include: {
       sellTransactions: true,
       stock: true
@@ -86,8 +86,8 @@ export const createSellTransactionService = async (
 
   if (buyTransaction === null) {
     throw new CustomError(
-      `${id}는 존재하지 않는 buyTransaction입니다.`,
-      ERROR_CODES.NOT_EXIST
+      `${buyId}는 존재하지 않는 buyTransaction입니다.`,
+      ERROR_CODES.NOT_FOUND
     )
   }
   if (buyTransaction.userId !== userId) {
@@ -110,7 +110,7 @@ export const createSellTransactionService = async (
     data: {
       ...data,
       buyTransaction: {
-        connect: {id: id}
+        connect: {id: buyId}
       }
     }
   })

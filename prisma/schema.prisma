@@ -46,6 +46,8 @@ model BuyTransaction {
   quantity          Int
   buyPrice          Float
   buyCreatedAt      DateTime
+  remainingQuantity Int        @default(0) 
+  profit            Float?     @default(0)
 
   user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   stock             Stock      @relation(fields: [stockTicker], references: [ticker], onDelete: Cascade)
@@ -56,7 +58,7 @@ model BuyTransaction {
 }
 
 // user와 필요할까?
-model SellTransaction {
+model SellTransaction {   
   id                String    @id @default(cuid())
   buyId             String
   quantity          Int

@@ -1,16 +1,23 @@
-import {PrismaClient} from '@prisma/client'
 import {CustomError} from '../../errors/CustomError'
 import client from '../../../prisma/db'
 import {ERROR_CODES} from '../../utils/constants'
 
 export const getTransactionByIdService = async (id: string, userId: string) => {
-  //   const transaction = await client.transaction.findUnique({
-  //     where: {id}
-  //   })
-  //   if (transaction?.userId !== userId) {
-  //     throw new CustomError('접근 권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
-  //   }
-  //   return {transaction}
+  const transaction = await client.buyTransaction.findUnique({
+    where: {id},
+    include: {
+      sellTransactions: true // 관련된 모든 매도 거래 포함
+    }
+  })
+
+  if (!transaction) {
+    throw new CustomError('거래를 찾을 수 없습니다.', ERROR_CODES.NOT_FOUND)
+  }
+
+  if (transaction?.userId !== userId) {
+    throw new CustomError('접근 권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
+  }
+  return {transaction}
 }
 
 export const getActiveTransactionsByTickerService = async (
@@ -24,7 +31,7 @@ export const getActiveTransactionsByTickerService = async (
   if (!stock) {
     throw new CustomError(
       `${ticker}는 존재하지 않는 stockTicker입니다.`,
-      ERROR_CODES.NOT_EXIST
+      ERROR_CODES.NOT_FOUND
     )
   }
 
@@ -76,7 +83,7 @@ export const getClosedTransactionsByTicker = async (
   if (!stock) {
     throw new CustomError(
       `${ticker}는 존재하지 않는 stockTicker입니다.`,
-      ERROR_CODES.NOT_EXIST
+      ERROR_CODES.NOT_FOUND
     )
   }
 
@@ -111,16 +118,6 @@ export const getClosedTransactionsByTicker = async (
       }))
     }
   })
-
-  // const total = transactions.reduce<TransactionTotal>(
-  //   (acc, transaction) => ({
-  //     profit:
-  //       acc.profit +
-  //       (transaction.profit ? transaction.profit * transaction.quantity : 0),
-  //     quantity: acc.quantity + transaction.quantity
-  //   }),
-  //   {profit: 0, quantity: 0}
-  // )
 
   return {stock, transactions: closedTransactions}
 }
