@@ -12,11 +12,11 @@ export const authRouter = (...args: any[]) => {
   return router
     .post('/sign-up', upload.none(), async (req, res) => {
       try {
-        const {name, email, password: plainPassword, emailVerified} = req.body
+        const {name, email, password: plainPassword} = req.body
         const hashedPassword = await U.hashPasswordP(plainPassword)
 
         const result = await client.user.create({
-          data: {name, email, emailVerified, password: hashedPassword}
+          data: {name, email, password: hashedPassword}
         })
 
         const {password: _password, ...userInfo} = result

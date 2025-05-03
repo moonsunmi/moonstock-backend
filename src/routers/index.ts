@@ -1,4 +1,5 @@
 export * from './authRouter'
+export * from './accountsRouter'
 export * from './usersRouter'
 export * from './stockRouter'
 export * from './testRouter'

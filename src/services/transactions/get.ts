@@ -1,123 +1,125 @@
-import {CustomError} from '../../errors/CustomError'
-import client from '../../../prisma/db'
-import {ERROR_CODES} from '../../utils/constants'
+// import {CustomError} from '../../errors/CustomError'
+// import client from '../../../prisma/db'
+// import {ERROR_CODES} from '../../utils/constants'
 
-export const getTransactionByIdService = async (id: string, userId: string) => {
-  const transaction = await client.buyTransaction.findUnique({
-    where: {id},
-    include: {
-      sellTransactions: true // 관련된 모든 매도 거래 포함
-    }
-  })
+// export const getTransactionByIdService = async (id: string, userId: string) => {
+//   const transaction = await client.buyTransaction.findUnique({
+//     where: {id},
+//     include: {
+//       sellTransactions: true // 관련된 모든 매도 거래 포함
+//     }
+//   })
 
-  if (!transaction) {
-    throw new CustomError('거래를 찾을 수 없습니다.', ERROR_CODES.NOT_FOUND)
-  }
+//   if (!transaction) {
+//     throw new CustomError('거래를 찾을 수 없습니다.', ERROR_CODES.NOT_FOUND)
+//   }
 
-  if (transaction?.userId !== userId) {
-    throw new CustomError('접근 권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
-  }
-  return {transaction}
-}
+//   if (transaction?.userId !== userId) {
+//     throw new CustomError('접근 권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
+//   }
+//   return {transaction}
+// }
 
-export const getActiveTransactionsByTickerService = async (
-  ticker: string,
-  userId: string
-) => {
-  const stock = await client.stock.findUnique({
-    where: {ticker}
-  })
+// export const getActiveTransactionsByTickerService = async (
+//   ticker: string,
+//   userId: string
+// ) => {
+//   const stock = await client.stock.findUnique({
+//     where: {ticker}
+//   })
 
-  if (!stock) {
-    throw new CustomError(
-      `${ticker}는 존재하지 않는 stockTicker입니다.`,
-      ERROR_CODES.NOT_FOUND
-    )
-  }
+//   if (!stock) {
+//     throw new CustomError(
+//       `${ticker}는 존재하지 않는 stockTicker입니다.`,
+//       ERROR_CODES.NOT_FOUND
+//     )
+//   }
 
-  const transactions = await client.buyTransaction.findMany({
-    where: {
-      userId,
-      stockTicker: ticker
-    },
-    include: {
-      sellTransactions: true
-    },
-    orderBy: {
-      buyCreatedAt: 'desc'
-    }
-  })
+//   const transactions = await client.buyTransaction.findMany({
+//     where: {
+//       userId,
+//       stockTicker: ticker
+//     },
+//     include: {
+//       sellTransactions: true
+//     },
+//     orderBy: {
+//       buyPrice: 'desc'
+//     }
+//   })
 
-  const activeTransactions = transactions
-    .map(txn => {
-      const soldQuantity = txn.sellTransactions.reduce(
-        (acc, sellTxn) => acc + sellTxn.quantity,
-        0
-      )
-      return {
-        id: txn.id,
-        quantity: txn.quantity - soldQuantity,
-        price: txn.buyPrice,
-        createdAt: txn.buyCreatedAt
-      }
-    })
-    .filter(tnx => tnx.quantity > 0)
+//   console.log(transactions)
 
-  return {stock, transactions: activeTransactions}
-}
+//   const activeTransactions = transactions
+//     .map(txn => {
+//       const soldQuantity = txn.sellTransactions.reduce(
+//         (acc, sellTxn) => acc + sellTxn.quantity,
+//         0
+//       )
+//       return {
+//         id: txn.id,
+//         quantity: txn.quantity - soldQuantity,
+//         price: txn.buyPrice,
+//         createdAt: txn.buyCreatedAt
+//       }
+//     })
+//     .filter(tnx => tnx.quantity > 0)
 
-interface TransactionTotal {
-  profit: number
-  quantity: number
-}
+//   return {stock, transactions: activeTransactions}
+// }
 
-export const getClosedTransactionsByTicker = async (
-  ticker: string,
-  userId: string
-) => {
-  // 하단 부분 middleware로 해야 할 듯.
-  const stock = await client.stock.findUnique({
-    where: {ticker}
-  })
+// interface TransactionTotal {
+//   profit: number
+//   quantity: number
+// }
 
-  if (!stock) {
-    throw new CustomError(
-      `${ticker}는 존재하지 않는 stockTicker입니다.`,
-      ERROR_CODES.NOT_FOUND
-    )
-  }
+// export const getClosedTransactionsByTicker = async (
+//   ticker: string,
+//   userId: string
+// ) => {
+//   // 하단 부분 middleware로 해야 할 듯.
+//   const stock = await client.stock.findUnique({
+//     where: {ticker}
+//   })
 
-  const transactions = await client.buyTransaction.findMany({
-    where: {
-      userId,
-      stockTicker: ticker
-    },
-    include: {
-      sellTransactions: true
-    },
-    orderBy: {
-      buyCreatedAt: 'desc'
-    }
-  })
+//   if (!stock) {
+//     throw new CustomError(
+//       `${ticker}는 존재하지 않는 stockTicker입니다.`,
+//       ERROR_CODES.NOT_FOUND
+//     )
+//   }
 
-  const closedTransactions = transactions.map(txn => {
-    const soldQuantity = txn.sellTransactions.reduce(
-      (acc, sellTxn) => acc + sellTxn.quantity,
-      0
-    )
-    return {
-      id: txn.id,
-      quantity: soldQuantity,
-      price: txn.buyPrice,
-      createdAt: txn.buyCreatedAt,
-      sellTransactions: txn.sellTransactions.map(sellTxn => ({
-        id: sellTxn.id,
-        quantity: sellTxn.quantity,
-        price: sellTxn.sellPrice,
-        createdAt: sellTxn.sellCreatedAt
-      }))
-    }
-  })
+//   const transactions = await client.buyTransaction.findMany({
+//     where: {
+//       userId,
+//       stockTicker: ticker
+//     },
+//     include: {
+//       sellTransactions: true
+//     },
+//     orderBy: {
+//       buyCreatedAt: 'desc'
+//     }
+//   })
 
-  return {stock, transactions: closedTransactions}
-}
+//   const closedTransactions = transactions.map(txn => {
+//     const soldQuantity = txn.sellTransactions.reduce(
+//       (acc, sellTxn) => acc + sellTxn.quantity,
+//       0
+//     )
+//     return {
+//       id: txn.id,
+//       quantity: soldQuantity,
+//       price: txn.buyPrice,
+//       createdAt: txn.buyCreatedAt,
+//       sellTransactions: txn.sellTransactions.map(sellTxn => ({
+//         id: sellTxn.id,
+//         quantity: sellTxn.quantity,
+//         price: sellTxn.sellPrice,
+//         createdAt: sellTxn.sellCreatedAt
+//       }))
+//     }
+//   })
+
+//   return {stock, transactions: closedTransactions}
+// }

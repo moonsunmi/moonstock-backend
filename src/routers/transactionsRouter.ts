@@ -7,58 +7,17 @@ import {AuthenticatedRequest} from '../types'
 import authenticateUser from '../middlewares/authenticateUser'
 import {getDuration, getOpposite} from '../utils/helper'
 import {
-  createBuyTransaction,
-  createSellTransaction,
+  createTransaction,
   // deleteTransaction,
-  getActiveTransactionsByTicker,
-  getClosedTransactions,
-  getTransaction,
-  updateBuyTransaction,
-  updateSellTransaction
+  // getActiveTransactionsByTicker,
+  // getClosedTransactions,
+  // getTransaction,
+  matchTransaction
+  // updateBuyTransaction,
+  // updateSellTransaction
   // matchTransaction,
   // postTransaction
 } from '../controllers/transactionsControllers'
-
-// GET /transactions/buy/{buyTransactionId}
-// 설명: 특정 매수 트랜잭션을 조회합니다.
-// 매수 트랜잭션 수정
-
-// PATCH /transactions/buy/{buyTransactionId}
-// 설명: 특정 매수 트랜잭션을 수정합니다. (예: 매수 수량 변경)
-// 매수 트랜잭션 삭제
-
-// DELETE /transactions/buy/{buyTransactionId}
-// 설명: 특정 매수 트랜잭션을 삭제합니다.
-////// ======> 매수 중에서 거래가 된 게 있다면 삭제 불가능함.
-
-// GET /transactions/buy/{buyTransactionId}/sell
-// 설명: 특정 매수 트랜잭션에 관련된 모든 매도 트랜잭션을 조회합니다.
-// 매도 트랜잭션 조회 (개별)
-
-// GET /sellTransactions/{sellTransactionId}
-// 설명: 특정 매도 트랜잭션을 조회합니다.
-// 매도 트랜잭션 수정
-
-// -------- 두 가지 스타일 중 하나를 선택해야 함. ---------
-// PATCH /sellTransactions/{sellTransactionId}
-// 설명: 특정 매도 트랜잭션을 수정합니다. (예: 매도 수량, 가격 변경)
-// PATCH /transactions/{buyTransactionId}/sell/{sellTransactionId}
-// 매수 트랜잭션 ID와 매도 트랜잭션 ID를 모두 명시하여, 수정하고자 하는 매도 트랜잭션을 특정합니다.
-
-// DELETE /sellTransactions/{sellTransactionId}
-// 설명: 특정 매도 트랜잭션을 삭제합니다.
-// 3. 기타 관련 API
-// 매수 및 매도 트랜잭션 모두 조회
-
-// GET /transactions/{userId}
-// 설명: 사용자의 모든 매수 및 매도 트랜잭션을 조회합니다.
-// 매수와 매도 트랜잭션을 함께 확인하려면, userId를 기준으로 전체 거래 내역을 조회하는 방식으로 사용할 수 있습니다.
-// 특정 종목에 대한 매수/매도 트랜잭션 조회
-
-// GET /stocks/{ticker}/transactions
-// 설명: 특정 종목에 대한 매수 및 매도 트랜잭션을 조회합니다.
-
-// PATCH /sellTransactions/{id}     // 매도 트랜잭션 수정
 
 export const transactionsRouter = (...args: any[]) => {
   // << chatgpt 아래 내용 반영?
@@ -66,36 +25,40 @@ export const transactionsRouter = (...args: any[]) => {
   const client = new PrismaClient()
   const upload = multer()
 
-  router.post('/buy', upload.none(), authenticateUser, createBuyTransaction)
-  router.post(
-    '/:buyId/sell',
-    upload.none(),
-    authenticateUser,
-    createSellTransaction
-  )
-  router.get('/:ticker/active', authenticateUser, getActiveTransactionsByTicker)
-  router.get('/:ticker/closed', authenticateUser, getClosedTransactions)
-  router.get('/:id', authenticateUser, getTransaction)
-  router.put(
-    '/buy/:id',
-    upload.none(),
-    authenticateUser,
-    // checkAuthorization,
-    updateBuyTransaction
-  )
-  router.put(
-    '/sell/:id',
-    upload.none(),
-    authenticateUser,
-    // checkAuthorization,
-    updateSellTransaction
-  )
-  // router.delete(
-  //   '/:id',
+  // 최초 거래 생성: 사용자가 새
+  router.post('/create', authenticateUser, createTransaction)
+
+  // 기존 주문과 매칭하는 거래 생성: 이미 등록된 주문과 연결하는 경우
+  router.post('/match', upload.none(), authenticateUser, matchTransaction)
+  // router.get('/:ticker/active', authenticateUser, getActiveTransactionsByTicker)
+  // router.get('/:ticker/closed', authenticateUser, getClosedTransactions)
+  // router.get('/:id', authenticateUser, getTransaction)
+  // router.put(
+  //   '/buy/:id',
+  //   upload.none(),
   //   authenticateUser,
-  //   //  checkAuthorization,
-  //   deleteTransaction
+  //   // checkAuthorization, 권한이 있는지 확인하는 것.
+  //   updateBuyTransaction
   // )
+  // router.put(
+  //   '/sell/:id',
+  //   upload.none(),
+  //   authenticateUser,
+  //   // checkAuthorization,
+  //   updateSellTransaction
+  // )
+  router.delete(
+    '/buy/:id',
+    authenticateUser
+    //  checkAuthorization,
+    // deleteBuyTransaction
+  )
+  router.delete(
+    '/sell/:id',
+    authenticateUser
+    //  checkAuthorization,
+    // deleteSellTransaction
+  )
 
   return router
 }
