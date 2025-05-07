@@ -5,12 +5,18 @@ import {ERROR_CODES} from '../../utils/constants'
 
 export const createTransactionService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any // authenticateUser 미들웨어에서 설정했다고 가정
-  const {accountId, stockTicker, type, quantity, price, createdAt} = req.body
+  const {accountId, stockTicker, type, quantity, price, tradeDate} = req.body
 
-  console.log('???????', req.body)
-  if (!accountId || !stockTicker || !type || !quantity || !price) {
+  if (
+    !accountId ||
+    !stockTicker ||
+    !type ||
+    !quantity ||
+    !price ||
+    !tradeDate
+  ) {
     throw new CustomError(
-      '필수 값이 누락되었습니다. (accountId, stockTicker, type, quantity, price 필요)',
+      '필수 값이 누락되었습니다. (accountId, stockTicker, type, quantity, price, tradeDate 필요)',
       ERROR_CODES.MISSING_VALUE
     )
   }
@@ -50,30 +56,32 @@ export const createTransactionService = async (req: AuthenticatedRequest) => {
   }
 
   // 최초 거래 생성 (매칭되지 않은 상태)
-  const transaction = await client.tradeTransaction.create({
+  const transaction = await client.trade.create({
     data: {
       user: {connect: {id: userId}},
       account: {connect: {id: accountId}},
       stock: {connect: {ticker: stockTicker}},
       type: type,
+      tradeDate: tradeDate,
       quantity: parsedQuantity,
       price: parsedPrice,
-      fee: 0,
-      tax: 0,
+      feeAmount: 0,
+      taxAmount: 0,
       feeRate: 0,
       taxRate: 0,
       // 아직 매칭되지 않았으므로 remainingQuantity는 전체 수량과 동일
-      remainingQuantity: parsedQuantity,
-      ...(createdAt ? {createdAt: new Date(createdAt)} : {})
+      unmatchedQty: parsedQuantity,
+      createdAt: new Date()
     }
   })
 
   return {transaction}
 }
 
+// todo. matching이 전부 수동으로. 매수한 후에 가능하도록
 export const matchTransactionService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any // authenticateUser 미들웨어에서 설정했다고 가정
-  const {initialOrderId, quantity, price, createdAt} = req.body
+  const {initialOrderId, quantity, price, tradeDate} = req.body
 
   if (!initialOrderId || !quantity || !price) {
     throw new CustomError(
@@ -86,7 +94,7 @@ export const matchTransactionService = async (req: AuthenticatedRequest) => {
   const parsedPrice = parseFloat(price)
 
   // 최초 주문 조회
-  const initialOrder = await client.tradeTransaction.findUnique({
+  const initialOrder = await client.trade.findUnique({
     where: {id: initialOrderId}
   })
   if (!initialOrder) {
@@ -100,9 +108,9 @@ export const matchTransactionService = async (req: AuthenticatedRequest) => {
     throw new CustomError('권한이 없습니다.', ERROR_CODES.UNAUTHORIZED)
   }
 
-  if (initialOrder.remainingQuantity < parsedQuantity) {
+  if (initialOrder.unmatchedQty < parsedQuantity) {
     throw new CustomError(
-      `매칭할 수량이 부족합니다. 남은 수량: ${initialOrder.remainingQuantity}`,
+      `매칭할 수량이 부족합니다. 남은 수량: ${initialOrder.unmatchedQty}`,
       ERROR_CODES.INVALID_VALUE
     )
   }
@@ -113,30 +121,31 @@ export const matchTransactionService = async (req: AuthenticatedRequest) => {
   // 트랜잭션을 이용하여 매칭 주문 생성 및 최초 주문 업데이트, TradeMatching 생성
   const matchingResult = await client.$transaction(async tx => {
     // 1. 매칭 주문 생성
-    const matchingOrder = await tx.tradeTransaction.create({
+    const matchingOrder = await tx.trade.create({
       data: {
         user: {connect: {id: userId}},
         // 최초 주문과 동일한 계정과 주식 사용
         account: {connect: {id: initialOrder.accountId}},
         stock: {connect: {ticker: initialOrder.stockTicker}},
         type: matchingType,
+        tradeDate,
         quantity: parsedQuantity,
         price: parsedPrice,
-        fee: 0,
-        tax: 0,
+        feeAmount: 0,
+        taxAmount: 0,
         feeRate: 0,
         taxRate: 0,
         // 매칭 주문은 즉시 처리되므로 remainingQuantity는 0
-        remainingQuantity: 0,
-        ...(createdAt ? {createdAt: new Date(createdAt)} : {})
+        unmatchedQty: 0,
+        createdAt: new Date()
       }
     })
 
     // 2. 최초 주문의 remainingQuantity 업데이트
-    const newRemaining = initialOrder.remainingQuantity - parsedQuantity
-    await tx.tradeTransaction.update({
+    const newRemaining = initialOrder.unmatchedQty - parsedQuantity
+    await tx.trade.update({
       where: {id: initialOrder.id},
-      data: {remainingQuantity: newRemaining}
+      data: {unmatchedQty: newRemaining}
     })
 
     // 3. TradeMatching 레코드 생성
@@ -146,12 +155,12 @@ export const matchTransactionService = async (req: AuthenticatedRequest) => {
     const sellTransactionId =
       initialOrder.type === 'SELL' ? initialOrder.id : matchingOrder.id
 
-    await tx.tradeMatching.create({
+    await tx.tradeMatch.create({
       data: {
         user: {connect: {id: userId}},
         stock: {connect: {ticker: initialOrder.stockTicker}},
-        buyTransaction: {connect: {id: buyTransactionId}},
-        sellTransaction: {connect: {id: sellTransactionId}},
+        buyTrade: {connect: {id: buyTransactionId}},
+        sellTrade: {connect: {id: sellTransactionId}},
         profit: 0, // 이후 수익 계산 로직 추가 가능
         netProfit: 0, // 이후 순수익 계산 로직 추가 가능
         fee: 0,
