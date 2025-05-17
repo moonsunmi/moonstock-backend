@@ -1,21 +1,17 @@
-// import {
-//   getActiveTransactionsByTickerService,
-//   getClosedTransactionsByTicker,
-//   getTransactionByIdService
-// } from '../services/transactions/get'
 import {AuthenticatedRequest} from '../types'
 import {updateTradeById} from '../services/trade/update'
-// import {
-//   deleteBuyTransactionById,
-//   deleteSellTransactionById
-// } from '../services/transactions/delete'
-import {Response} from 'express'
+import {RequestHandler, Response} from 'express'
 import {createTradeService, matchTradeService} from '../services/trade/create'
 import {CustomError} from '../errors/CustomError'
 
-export const createTrade = async (req: AuthenticatedRequest, res: Response) => {
+export const createTrade: RequestHandler = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const authReq = req as AuthenticatedRequest
+
   try {
-    const trade = await createTradeService(req)
+    const trade = await createTradeService(authReq)
     return res.status(201).json({trade})
   } catch (error) {
     console.error('createTrade 에러:', error)
@@ -34,8 +30,10 @@ export const createTrade = async (req: AuthenticatedRequest, res: Response) => {
 
 // todo. 이건 매치로 옮겨야 하려나?
 export const matchTrade = async (req: AuthenticatedRequest, res: Response) => {
+  const authReq = req as AuthenticatedRequest
+
   try {
-    const trade = await matchTradeService(req)
+    const trade = await matchTradeService(authReq)
     return res.status(201).json({trade})
   } catch (error) {
     console.error('matchTrade 에러:', error)
@@ -154,9 +152,11 @@ export const matchTrade = async (req: AuthenticatedRequest, res: Response) => {
 // }
 
 export const updateTrade = async (req: AuthenticatedRequest, res: Response) => {
+  const authReq = req as AuthenticatedRequest
+
   try {
     const {id} = req.params
-    const result = await updateTradeById(id, req)
+    const result = await updateTradeById(id, authReq)
     return res.status(200).json(result)
   } catch (err) {
     if (err instanceof CustomError) {

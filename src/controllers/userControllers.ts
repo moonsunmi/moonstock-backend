@@ -1,19 +1,19 @@
-import {Request, Response} from 'express'
+import {RequestHandler, Response} from 'express'
 import {CustomError} from '../errors/CustomError'
-import {createAccountService} from '../services/accountService'
+import {getHoldingsService} from '../services/user/getHoldings'
 import {AuthenticatedRequest} from '../types'
 
-export const createAccount = async (
+export const getHoldings: RequestHandler = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
   const authReq = req as AuthenticatedRequest
 
   try {
-    const account = await createAccountService(authReq)
-    return res.status(201).json({account})
+    const holdings = await getHoldingsService(authReq)
+    return res.status(200).json({holdings})
   } catch (error) {
-    console.error('createAccount 에러:', error)
+    console.error('getHoldings 에러:', error)
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json({
         errorCode: error.errorCode,
