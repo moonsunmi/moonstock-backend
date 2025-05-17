@@ -1,10 +1,9 @@
 import {Router} from 'express'
-import {Prisma, PrismaClient} from '@prisma/client'
-import {extractUserIdFromJwt} from '../utils'
+import {Prisma} from '@prisma/client'
+import client from '../../prisma/db'
 
 export const stockRouter = (...args: any[]) => {
   const router = Router()
-  const client = new PrismaClient()
 
   return router.get('/', async (req, res) => {
     try {

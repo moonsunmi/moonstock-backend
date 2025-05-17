@@ -7,39 +7,31 @@ import {AuthenticatedRequest} from '../types'
 import authenticateUser from '../middlewares/authenticateUser'
 import {getDuration, getOpposite} from '../utils/helper'
 import {
-  createTransaction,
-  // deleteTransaction,
-  // getActiveTransactionsByTicker,
-  // getClosedTransactions,
-  // getTransaction,
-  matchTransaction
-  // updateBuyTransaction,
-  // updateSellTransaction
-  // matchTransaction,
-  // postTransaction
-} from '../controllers/transactionsControllers'
+  createTrade,
+  matchTrade,
+  updateTrade
+} from '../controllers/tradeControllers'
 
-export const transactionsRouter = (...args: any[]) => {
+// /trade
+export const tradeRouter = (...args: any[]) => {
   // << chatgpt 아래 내용 반영?
   const router = Router()
   const client = new PrismaClient()
   const upload = multer()
 
-  // 최초 거래 생성: 사용자가 새
-  router.post('/create', authenticateUser, createTransaction)
+  router.post('/create', upload.none(), authenticateUser, createTrade)
+  router.post('/match', upload.none(), authenticateUser, matchTrade)
+  router.put(
+    '/:id/update',
+    upload.none(),
+    authenticateUser,
+    // checkAuthorization, 권한이 있는지 확인하는 것.
+    updateTrade
+  )
 
-  // 기존 주문과 매칭하는 거래 생성: 이미 등록된 주문과 연결하는 경우
-  router.post('/match', upload.none(), authenticateUser, matchTransaction)
   // router.get('/:ticker/active', authenticateUser, getActiveTransactionsByTicker)
   // router.get('/:ticker/closed', authenticateUser, getClosedTransactions)
   // router.get('/:id', authenticateUser, getTransaction)
-  // router.put(
-  //   '/buy/:id',
-  //   upload.none(),
-  //   authenticateUser,
-  //   // checkAuthorization, 권한이 있는지 확인하는 것.
-  //   updateBuyTransaction
-  // )
   // router.put(
   //   '/sell/:id',
   //   upload.none(),

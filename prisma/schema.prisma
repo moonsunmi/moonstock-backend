@@ -76,10 +76,10 @@ model Trade {
   tradeDate         DateTime
   quantity          Int
   price             Float
-  unmatchedQty       Int
+  unmatchedQty      Int
 
-  feeAmount               Float          // 거래 당시 수수료
-  taxAmount               Float          // 거래 당시 세금
+  feeAmount         Float          // 거래 당시 수수료
+  taxAmount         Float          // 거래 당시 세금
   feeRate           Float          // 거래 당시 수수료율
   taxRate           Float          // 거래 당시 세율
   

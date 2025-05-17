@@ -4,30 +4,21 @@
 //   getTransactionByIdService
 // } from '../services/transactions/get'
 import {AuthenticatedRequest} from '../types'
-import {
-  updateBuyTransactionById,
-  updateSellTransactionById
-} from '../services/transactions/update'
+import {updateTradeById} from '../services/trade/update'
 // import {
 //   deleteBuyTransactionById,
 //   deleteSellTransactionById
 // } from '../services/transactions/delete'
-import {Request, Response} from 'express'
-import {
-  createTransactionService,
-  matchTransactionService
-} from '../services/transactions/create'
+import {Response} from 'express'
+import {createTradeService, matchTradeService} from '../services/trade/create'
 import {CustomError} from '../errors/CustomError'
 
-export const createTransaction = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
+export const createTrade = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const transaction = await createTransactionService(req)
-    return res.status(201).json({transaction})
+    const trade = await createTradeService(req)
+    return res.status(201).json({trade})
   } catch (error) {
-    console.error('createTransaction 에러:', error)
+    console.error('createTrade 에러:', error)
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json({
         errorCode: error.errorCode,
@@ -41,15 +32,13 @@ export const createTransaction = async (
   }
 }
 
-export const matchTransaction = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
+// todo. 이건 매치로 옮겨야 하려나?
+export const matchTrade = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const transaction = await matchTransactionService(req)
-    return res.status(201).json({transaction})
+    const trade = await matchTradeService(req)
+    return res.status(201).json({trade})
   } catch (error) {
-    console.error('matchTransaction 에러:', error)
+    console.error('matchTrade 에러:', error)
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json({
         errorCode: error.errorCode,
@@ -164,28 +153,25 @@ export const matchTransaction = async (
 //   }
 // }
 
-// export const updateSellTransaction = async (
-//   req: AuthenticatedRequest,
-//   res: Response
-// ) => {
-//   try {
-//     const {id} = req.params
-//     const result = await updateSellTransactionById(id, req)
-//     return res.status(200).json(result)
-//   } catch (err) {
-//     if (err instanceof CustomError) {
-//       return res.status(400).json({
-//         errorCode: err.errorCode,
-//         message: err.message
-//       })
-//     }
-//     console.error('알 수 없는 오류 발생:', err)
-//     return res.status(500).json({
-//       errorCode: 'ERROR_CODE_SERVER_ERROR',
-//       message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
-//     })
-//   }
-// }
+export const updateTrade = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const {id} = req.params
+    const result = await updateTradeById(id, req)
+    return res.status(200).json(result)
+  } catch (err) {
+    if (err instanceof CustomError) {
+      return res.status(400).json({
+        errorCode: err.errorCode,
+        message: err.message
+      })
+    }
+    console.error('알 수 없는 오류 발생:', err)
+    return res.status(500).json({
+      errorCode: 'ERROR_CODE_SERVER_ERROR',
+      message: '서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.'
+    })
+  }
+}
 
 // export const deleteBuyTransaction = async (
 //   req: AuthenticatedRequest,

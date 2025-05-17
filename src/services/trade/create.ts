@@ -3,20 +3,22 @@ import {CustomError} from '../../errors/CustomError'
 import client from '../../../prisma/db'
 import {ERROR_CODES} from '../../utils/constants'
 
-export const createTransactionService = async (req: AuthenticatedRequest) => {
+export const createTradeService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any // authenticateUser 미들웨어에서 설정했다고 가정
   const {accountId, stockTicker, type, quantity, price, tradeDate} = req.body
 
-  if (
-    !accountId ||
-    !stockTicker ||
-    !type ||
-    !quantity ||
-    !price ||
-    !tradeDate
-  ) {
+  const missingFields: string[] = []
+
+  if (!accountId) missingFields.push('accountId')
+  if (!stockTicker) missingFields.push('stockTicker')
+  if (!type) missingFields.push('type')
+  if (!quantity) missingFields.push('quantity')
+  if (!price) missingFields.push('price')
+  if (!tradeDate) missingFields.push('tradeDate')
+
+  if (missingFields.length > 0) {
     throw new CustomError(
-      '필수 값이 누락되었습니다. (accountId, stockTicker, type, quantity, price, tradeDate 필요)',
+      `다음 필수값이 누락되었습니다: ${missingFields.join(', ')}`,
       ERROR_CODES.MISSING_VALUE
     )
   }
@@ -56,7 +58,7 @@ export const createTransactionService = async (req: AuthenticatedRequest) => {
   }
 
   // 최초 거래 생성 (매칭되지 않은 상태)
-  const transaction = await client.trade.create({
+  const trade = await client.trade.create({
     data: {
       user: {connect: {id: userId}},
       account: {connect: {id: accountId}},
@@ -75,11 +77,11 @@ export const createTransactionService = async (req: AuthenticatedRequest) => {
     }
   })
 
-  return {transaction}
+  return {trade}
 }
 
 // todo. matching이 전부 수동으로. 매수한 후에 가능하도록
-export const matchTransactionService = async (req: AuthenticatedRequest) => {
+export const matchTradeService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any // authenticateUser 미들웨어에서 설정했다고 가정
   const {initialOrderId, quantity, price, tradeDate} = req.body
 
@@ -150,17 +152,17 @@ export const matchTransactionService = async (req: AuthenticatedRequest) => {
 
     // 3. TradeMatching 레코드 생성
     // 최초 주문과 매칭 주문 중 BUY인 주문이 매수, SELL인 주문이 매도로 결정됨
-    const buyTransactionId =
+    const buyTradeId =
       initialOrder.type === 'BUY' ? initialOrder.id : matchingOrder.id
-    const sellTransactionId =
+    const sellTradeId =
       initialOrder.type === 'SELL' ? initialOrder.id : matchingOrder.id
 
     await tx.tradeMatch.create({
       data: {
         user: {connect: {id: userId}},
         stock: {connect: {ticker: initialOrder.stockTicker}},
-        buyTrade: {connect: {id: buyTransactionId}},
-        sellTrade: {connect: {id: sellTransactionId}},
+        buyTrade: {connect: {id: buyTradeId}},
+        sellTrade: {connect: {id: sellTradeId}},
         profit: 0, // 이후 수익 계산 로직 추가 가능
         netProfit: 0, // 이후 순수익 계산 로직 추가 가능
         fee: 0,
@@ -173,5 +175,5 @@ export const matchTransactionService = async (req: AuthenticatedRequest) => {
     return matchingOrder
   })
 
-  return {transaction: matchingResult}
+  return {trade: matchingResult}
 }
