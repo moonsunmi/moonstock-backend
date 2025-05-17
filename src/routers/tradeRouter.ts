@@ -8,6 +8,7 @@ import authenticateUser from '../middlewares/authenticateUser'
 import {getDuration, getOpposite} from '../utils/helper'
 import {
   createTrade,
+  getTradingByTicker,
   matchTrade,
   updateTrade
 } from '../controllers/tradeControllers'
@@ -21,15 +22,9 @@ export const tradeRouter = (...args: any[]) => {
 
   router.post('/create', upload.none(), authenticateUser, createTrade)
   router.post('/match', upload.none(), authenticateUser, matchTrade)
-  router.put(
-    '/:id/update',
-    upload.none(),
-    authenticateUser,
-    // checkAuthorization, 권한이 있는지 확인하는 것.
-    updateTrade
-  )
+  router.put('/:id/update', upload.none(), authenticateUser, updateTrade)
+  router.get('/:ticker/trading', authenticateUser, getTradingByTicker)
 
-  // router.get('/:ticker/active', authenticateUser, getActiveTransactionsByTicker)
   // router.get('/:ticker/closed', authenticateUser, getClosedTransactions)
   // router.get('/:id', authenticateUser, getTransaction)
   // router.put(
