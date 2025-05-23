@@ -73,7 +73,7 @@ model Trade {
   accountId         String
   stockTicker       String
   type              TradeType
-  tradeDate         DateTime
+  tradeAt           DateTime
   quantity          Int
   price             Float
   unmatchedQty      Int

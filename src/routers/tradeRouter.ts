@@ -1,11 +1,7 @@
-import {Response, Router} from 'express'
-import {Prisma, PrismaClient} from '@prisma/client'
+import {Router} from 'express'
 import multer from 'multer'
 
-import {AuthenticatedRequest} from '../types'
-
 import authenticateUser from '../middlewares/authenticateUser'
-import {getDuration, getOpposite} from '../utils/helper'
 import {
   createTrade,
   getTradingByTicker,
@@ -17,7 +13,6 @@ import {
 export const tradeRouter = (...args: any[]) => {
   // << chatgpt 아래 내용 반영?
   const router = Router()
-  const client = new PrismaClient()
   const upload = multer()
 
   router.post('/create', upload.none(), authenticateUser, createTrade)
