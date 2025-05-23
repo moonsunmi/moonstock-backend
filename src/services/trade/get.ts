@@ -23,7 +23,7 @@ export const getTradingByTickerService = async (
       stockTicker: ticker
     },
     orderBy: {
-      tradeDate: 'desc'
+      tradeAt: 'desc'
     }
   })
 

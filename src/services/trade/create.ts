@@ -5,7 +5,7 @@ import {ERROR_CODES} from '../../utils/constants'
 
 export const createTradeService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any // authenticateUser 미들웨어에서 설정했다고 가정
-  const {accountId, stockTicker, type, quantity, price, tradeDate} = req.body
+  const {accountId, stockTicker, type, quantity, price, tradeAt} = req.body
 
   const missingFields: string[] = []
 
@@ -14,7 +14,7 @@ export const createTradeService = async (req: AuthenticatedRequest) => {
   if (!type) missingFields.push('type')
   if (!quantity) missingFields.push('quantity')
   if (!price) missingFields.push('price')
-  if (!tradeDate) missingFields.push('tradeDate')
+  if (!tradeAt) missingFields.push('tradeAt')
 
   if (missingFields.length > 0) {
     throw new CustomError(
@@ -63,8 +63,8 @@ export const createTradeService = async (req: AuthenticatedRequest) => {
       user: {connect: {id: userId}},
       account: {connect: {id: accountId}},
       stock: {connect: {ticker: stockTicker}},
-      type: type,
-      tradeDate: tradeDate,
+      type,
+      tradeAt,
       quantity: parsedQuantity,
       price: parsedPrice,
       feeAmount: 0,
@@ -83,7 +83,7 @@ export const createTradeService = async (req: AuthenticatedRequest) => {
 // todo. matching이 전부 수동으로. 매수한 후에 가능하도록
 export const matchTradeService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any // authenticateUser 미들웨어에서 설정했다고 가정
-  const {initialOrderId, quantity, price, tradeDate} = req.body
+  const {initialOrderId, quantity, price, tradeAt} = req.body
 
   if (!initialOrderId || !quantity || !price) {
     throw new CustomError(
@@ -130,7 +130,7 @@ export const matchTradeService = async (req: AuthenticatedRequest) => {
         account: {connect: {id: initialOrder.accountId}},
         stock: {connect: {ticker: initialOrder.stockTicker}},
         type: matchingType,
-        tradeDate,
+        tradeAt,
         quantity: parsedQuantity,
         price: parsedPrice,
         feeAmount: 0,

@@ -8,13 +8,13 @@ export const updateTradeById = async (
   id: string,
   req: AuthenticatedRequest
 ) => {
-  const {quantity, price, tradeDate, feeAmount, taxAmount, feeRate, taxRate} =
+  const {quantity, price, tradeAt, feeAmount, taxAmount, feeRate, taxRate} =
     req.body
 
   const data = {
     quantity: parseFloat(quantity),
     price: parseFloat(price),
-    tradeDate: new Date(tradeDate),
+    tradeAt: new Date(tradeAt),
     feeAmount: parseFloat(feeAmount),
     taxAmount: parseFloat(taxAmount),
     feeRate: parseFloat(feeRate),
