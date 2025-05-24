@@ -27,7 +27,7 @@ export const getTradingByTickerService = async (
     }
   })
 
-  const tradings = trades.filter(tnx => tnx.unmatchedQty > 0)
+  const tradings = trades.filter(tnx => tnx.isMatched === false)
 
   return {stock, tradings}
 }

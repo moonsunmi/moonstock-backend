@@ -76,7 +76,7 @@ model Trade {
   tradeAt           DateTime
   quantity          Int
   price             Float
-  unmatchedQty      Int
+  isMatched         Boolean @default(false)
 
   feeAmount         Float          // 거래 당시 수수료
   taxAmount         Float          // 거래 당시 세금

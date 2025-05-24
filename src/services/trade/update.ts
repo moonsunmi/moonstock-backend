@@ -35,8 +35,6 @@ export const updateTradeById = async (
     )
   }
 
-  // todo. unmatchedQty 계산해서 넣기
-
   // todo. 매도 일자보다 더 이후로 날짜 수정 안 되게 해야 할 듯....?
   const updated = await client.trade.update({
     where: {id},
