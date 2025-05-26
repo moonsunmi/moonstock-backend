@@ -4,6 +4,7 @@ import multer from 'multer'
 import authenticateUser from '../middlewares/authenticateUser'
 import {
   createTrade,
+  getMatchedByTicker,
   getTradingByTicker,
   matchTrade,
   updateTrade
@@ -19,6 +20,7 @@ export const tradeRouter = (...args: any[]) => {
   router.post('/match', upload.none(), authenticateUser, matchTrade)
   router.put('/:id/update', upload.none(), authenticateUser, updateTrade)
   router.get('/:ticker/trading', authenticateUser, getTradingByTicker)
+  router.get('/:ticker/matched', authenticateUser, getMatchedByTicker)
 
   // router.get('/:ticker/closed', authenticateUser, getClosedTransactions)
   // router.get('/:id', authenticateUser, getTransaction)
