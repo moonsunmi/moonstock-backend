@@ -1,12 +1,12 @@
-import {CustomError} from '../../errors/CustomError'
-import client from '../../../prisma/db'
-import {ERROR_CODES} from '../../utils/constants'
+import {CustomError} from '@/errors/CustomError'
+import prisma from '@/lib/prisma'
+import {ERROR_CODES} from '@/utils/constants'
 
 export const getTradingByTickerService = async (
   ticker: string,
   userId: string
 ) => {
-  const stock = await client.stock.findUnique({
+  const stock = await prisma.stock.findUnique({
     where: {ticker}
   })
 
@@ -17,7 +17,7 @@ export const getTradingByTickerService = async (
     )
   }
 
-  const trades = await client.trade.findMany({
+  const trades = await prisma.trade.findMany({
     where: {
       userId,
       stockTicker: ticker
@@ -36,7 +36,7 @@ export const getMatchedByTickerService = async (
   ticker: string,
   userId: string
 ) => {
-  const stock = await client.stock.findUnique({
+  const stock = await prisma.stock.findUnique({
     where: {ticker}
   })
 
@@ -47,7 +47,7 @@ export const getMatchedByTickerService = async (
     )
   }
 
-  const matched = await client.tradeMatch.findMany({
+  const matched = await prisma.tradeMatch.findMany({
     where: {
       userId,
       stockTicker: ticker

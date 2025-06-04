@@ -1,13 +1,13 @@
 import {Router} from 'express'
 import {Prisma} from '@prisma/client'
-import client from '../../prisma/db'
+import prisma from '@/lib/prisma'
 
 export const stockRouter = (...args: any[]) => {
   const router = Router()
 
   return router.get('/', async (req, res) => {
     try {
-      const result = await client.stock.findMany()
+      const result = await prisma.stock.findMany()
 
       res.status(200).json({stockList: result})
     } catch (err) {

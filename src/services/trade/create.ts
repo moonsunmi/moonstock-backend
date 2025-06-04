@@ -1,7 +1,8 @@
-import {AuthenticatedRequest} from '../../types'
-import {CustomError} from '../../errors/CustomError'
-import client from '../../../prisma/db'
-import {ERROR_CODES} from '../../utils/constants'
+import {AuthenticatedRequest} from '@/types'
+import {CustomError} from '../errors/CustomError'
+
+import {ERROR_CODES} from '../utils/constants'
+import prisma from '../lib/prisma'
 
 export const createTradeService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any
@@ -33,7 +34,7 @@ export const createTradeService = async (req: AuthenticatedRequest) => {
     )
   }
 
-  const stockRecord = await client.stock.findUnique({
+  const stockRecord = await prisma.stock.findUnique({
     where: {ticker: stockTicker}
   })
   if (!stockRecord) {
@@ -43,7 +44,7 @@ export const createTradeService = async (req: AuthenticatedRequest) => {
     )
   }
 
-  const accountRecord = await client.account.findUnique({
+  const accountRecord = await prisma.account.findUnique({
     where: {id: accountId}
   })
   if (!accountRecord) {
@@ -54,7 +55,7 @@ export const createTradeService = async (req: AuthenticatedRequest) => {
     )
   }
 
-  const trade = await client.trade.create({
+  const trade = await prisma.trade.create({
     data: {
       user: {connect: {id: userId}},
       account: {connect: {id: accountId}},
@@ -92,8 +93,8 @@ export const matchTradeService = async (req: AuthenticatedRequest) => {
   }
 
   const [buyTrade, sellTrade] = await Promise.all([
-    client.trade.findUnique({where: {id: buyTradeId}}),
-    client.trade.findUnique({where: {id: sellTradeId}})
+    prisma.trade.findUnique({where: {id: buyTradeId}}),
+    prisma.trade.findUnique({where: {id: sellTradeId}})
   ])
 
   if (!buyTrade || !sellTrade) {
@@ -122,7 +123,7 @@ export const matchTradeService = async (req: AuthenticatedRequest) => {
   const tax = buyTrade.taxAmount + sellTrade.taxAmount
   const netProfit = profit - fee - tax
 
-  const matched = await client.tradeMatch.create({
+  const matched = await prisma.tradeMatch.create({
     data: {
       userId,
       stockTicker: buyTrade.stockTicker,
@@ -139,11 +140,11 @@ export const matchTradeService = async (req: AuthenticatedRequest) => {
   })
 
   await Promise.all([
-    client.trade.update({
+    prisma.trade.update({
       where: {id: buyTradeId},
       data: {isMatched: true}
     }),
-    client.trade.update({
+    prisma.trade.update({
       where: {id: sellTradeId},
       data: {isMatched: true}
     })

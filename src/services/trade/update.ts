@@ -1,8 +1,7 @@
-import {CustomError} from '../../errors/CustomError'
-import {AuthenticatedRequest} from '../../types'
-// import {getDuration, getOpposite} from '../../utils/helper'
-import client from '../../../prisma/db'
-import {ERROR_CODES} from '../../utils/constants'
+import {CustomError} from '@/errors/CustomError'
+import {AuthenticatedRequest} from '@/types'
+import prisma from '@/lib/prisma'
+import {ERROR_CODES} from '@/utils/constants'
 
 export const updateTradeById = async (
   id: string,
@@ -36,11 +35,11 @@ export const updateTradeById = async (
   }
 
   // todo. 매도 일자보다 더 이후로 날짜 수정 안 되게 해야 할 듯....?
-  const updated = await client.trade.update({
+  const updated = await prisma.trade.update({
     where: {id},
     data: {
       ...data
     }
   })
-  return {transaction: updated}
+  return {...updated}
 }

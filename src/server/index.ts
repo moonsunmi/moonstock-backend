@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 import {setupRouters} from './setupRouters'
 import cookieParser from 'cookie-parser'
-import bodyParser from 'body-parser'
 
 export const createExpressApp = (...args: any[]) => {
   const app = express()

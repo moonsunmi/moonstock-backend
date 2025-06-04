@@ -1,8 +1,8 @@
-import {Response, Router} from 'express'
+import {Router} from 'express'
 import multer from 'multer'
 
-import authenticateUser from '../middlewares/authenticateUser'
-import {getHoldings} from '../controllers/userControllers'
+import authenticateUser from '@/middlewares/authenticateUser'
+import {getHoldings} from '@/controllers/userControllers'
 
 export const usersRouter = (...args: any[]) => {
   const router = Router()

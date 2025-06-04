@@ -1,9 +1,6 @@
-import {TransactionStatus} from '@prisma/client'
-import {CustomError} from '../errors/CustomError'
+import {TradeType} from '@prisma/client'
 
-export const getOpposite = (
-  type: TransactionStatus
-): 'SELL' | 'BUY' | 'NONE' => {
+export const getOpposite = (type: TradeType): 'SELL' | 'BUY' | 'NONE' => {
   if (type === 'BUY') {
     return 'SELL'
   } else if (type === 'SELL') {

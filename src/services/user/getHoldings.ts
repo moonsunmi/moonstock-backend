@@ -1,10 +1,10 @@
-import {AuthenticatedRequest} from '../../types'
-import client from '../../../prisma/db'
+import {AuthenticatedRequest} from '@/types'
+import prisma from '@/lib/prisma'
 
 export const getHoldingsService = async (req: AuthenticatedRequest) => {
   const {userId} = req
 
-  const holdings = await client.trade.findMany({
+  const holdings = await prisma.trade.findMany({
     where: {userId: userId},
     distinct: ['stockTicker'],
     select: {stock: true}

@@ -1,12 +1,12 @@
 import {Router} from 'express'
 import multer from 'multer'
-import {Prisma, PrismaClient} from '@prisma/client'
+import {Prisma} from '@prisma/client'
 import * as U from '../utils'
 import {extractUserIdFromJwt} from '../utils'
+import prisma from '../lib/prisma'
 
 export const authRouter = (...args: any[]) => {
   const router = Router()
-  const client = new PrismaClient()
   const upload = multer()
 
   return router
@@ -15,7 +15,7 @@ export const authRouter = (...args: any[]) => {
         const {name, email, password: plainPassword} = req.body
         const hashedPassword = await U.hashPasswordP(plainPassword)
 
-        const result = await client.user.create({
+        const result = await prisma.user.create({
           data: {name, email, password: hashedPassword}
         })
 
@@ -35,7 +35,7 @@ export const authRouter = (...args: any[]) => {
       try {
         const {email, password} = req.body
 
-        const result = await client.user.findUnique({where: {email: email}})
+        const result = await prisma.user.findUnique({where: {email: email}})
 
         if (!result) {
           return res.status(401).json({message: '등록되지 않은 사용자입니다.'})

@@ -1,5 +1,5 @@
 import {createServer} from 'http'
-import {createExpressApp} from './express'
+import {createExpressApp} from './server'
 import {makeDir} from './utils'
 import {getPublicDirPath} from './config'
 
