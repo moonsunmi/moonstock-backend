@@ -8,5 +8,6 @@
     "esModuleInterop": true,
     "baseUrl": "."
   },
-  "include": ["src"]
+  "include": ["src"],
+  "types": ["node"]
 }
