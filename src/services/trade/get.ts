@@ -1,6 +1,6 @@
-import {CustomError} from '@/errors/CustomError'
-import prisma from '@/lib/prisma'
-import {ERROR_CODES} from '@/utils/constants'
+import {CustomError} from '../../errors/CustomError'
+import prisma from '../../lib/prisma'
+import {ERROR_CODES} from '../../utils/constants'
 
 export const getTradingByTickerService = async (
   ticker: string,

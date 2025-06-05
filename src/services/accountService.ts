@@ -1,7 +1,7 @@
 import {Request} from 'express'
-import {CustomError} from '@/errors/CustomError'
-import {ERROR_CODES} from '@/utils/constants'
-import prisma from '@/lib/prisma'
+import {CustomError} from '../errors/CustomError'
+import {ERROR_CODES} from '../utils/constants'
+import prisma from '../lib/prisma'
 
 export const createAccountService = async (req: Request) => {
   const {userId} = req as any // authenticateUser 미들웨어에서 userId를 설정했다고 가정

@@ -1,8 +1,8 @@
-import {AuthenticatedRequest} from '@/types'
-import {CustomError} from '../errors/CustomError'
+import {AuthenticatedRequest} from '../../types'
+import {CustomError} from '../../errors/CustomError'
 
-import {ERROR_CODES} from '../utils/constants'
-import prisma from '../lib/prisma'
+import {ERROR_CODES} from '../../utils/constants'
+import prisma from '../../lib/prisma'
 
 export const createTradeService = async (req: AuthenticatedRequest) => {
   const {userId} = req as any

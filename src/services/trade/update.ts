@@ -1,7 +1,7 @@
-import {CustomError} from '@/errors/CustomError'
-import {AuthenticatedRequest} from '@/types'
-import prisma from '@/lib/prisma'
-import {ERROR_CODES} from '@/utils/constants'
+import {CustomError} from '../../errors/CustomError'
+import {AuthenticatedRequest} from '../../types'
+import prisma from '../../lib/prisma'
+import {ERROR_CODES} from '../../utils/constants'
 
 export const updateTradeById = async (
   id: string,

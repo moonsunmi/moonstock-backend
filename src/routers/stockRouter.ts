@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import {Prisma} from '@prisma/client'
-import prisma from '@/lib/prisma'
+import prisma from '../lib/prisma'
 
 export const stockRouter = (...args: any[]) => {
   const router = Router()

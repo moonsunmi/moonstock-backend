@@ -1,5 +1,5 @@
-import {AuthenticatedRequest} from '@/types'
-import prisma from '@/lib/prisma'
+import {AuthenticatedRequest} from '../../types'
+import prisma from '../../lib/prisma'
 
 export const getHoldingsService = async (req: AuthenticatedRequest) => {
   const {userId} = req
