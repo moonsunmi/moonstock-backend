@@ -1,5 +1,4 @@
 import {Router} from 'express'
-import multer from 'multer'
 import {Prisma} from '@prisma/client'
 import * as U from '../utils'
 import {extractUserIdFromJwt} from '../utils'
@@ -7,10 +6,9 @@ import prisma from '../lib/prisma'
 
 export const authRouter = (...args: any[]) => {
   const router = Router()
-  const upload = multer()
 
   return router
-    .post('/sign-up', upload.none(), async (req, res) => {
+    .post('/sign-up', async (req, res) => {
       try {
         const {name, email, password: plainPassword} = req.body
         const hashedPassword = await U.hashPasswordP(plainPassword)
@@ -31,11 +29,14 @@ export const authRouter = (...args: any[]) => {
         }
       }
     })
-    .post('/login', upload.none(), async (req, res) => {
+    .post('/login', async (req, res) => {
       try {
         const {email, password} = req.body
 
-        const result = await prisma.user.findUnique({where: {email: email}})
+        const result = await prisma.user.findUnique({
+          where: {email: email},
+          include: {accounts: true}
+        })
 
         if (!result) {
           return res.status(401).json({message: '등록되지 않은 사용자입니다.'})
@@ -68,6 +69,7 @@ export const authRouter = (...args: any[]) => {
           return res.status(401).json({message: '비밀번호가 틀렸습니다.'})
         }
       } catch (e) {
+        console.error(e)
         return res.status(500).json({message: '오류'})
       }
     })

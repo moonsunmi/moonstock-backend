@@ -5,8 +5,6 @@ import cookieParser from 'cookie-parser'
 
 export const createExpressApp = (...args: any[]) => {
   const app = express()
-  var multer = require('multer')
-  var upload = multer()
 
   app
     .use((req, res, next) => {

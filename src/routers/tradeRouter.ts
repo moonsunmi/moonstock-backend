@@ -1,5 +1,4 @@
 import {Router} from 'express'
-import multer from 'multer'
 
 import authenticateUser from '../middlewares/authenticateUser'
 import {
@@ -14,11 +13,10 @@ import {
 export const tradeRouter = (...args: any[]) => {
   // << chatgpt 아래 내용 반영?
   const router = Router()
-  const upload = multer()
 
-  router.post('/create', upload.none(), authenticateUser, createTrade)
-  router.post('/match', upload.none(), authenticateUser, matchTrade)
-  router.put('/:id/update', upload.none(), authenticateUser, updateTrade)
+  router.post('/create', authenticateUser, createTrade)
+  router.post('/match', authenticateUser, matchTrade)
+  router.put('/:id/update', authenticateUser, updateTrade)
   router.get('/:ticker/trading', authenticateUser, getTradingByTicker)
   router.get('/:ticker/matched', authenticateUser, getMatchedByTicker)
 
@@ -26,7 +24,6 @@ export const tradeRouter = (...args: any[]) => {
   // router.get('/:id', authenticateUser, getTransaction)
   // router.put(
   //   '/sell/:id',
-  //   upload.none(),
   //   authenticateUser,
   //   // checkAuthorization,
   //   updateSellTransaction
@@ -64,10 +61,9 @@ import {RequestHandler} from 'express'
 export const transactionsRouter = (middlewares: RequestHandler[] = []) => {
   const router = Router()
   const client = new PrismaClient()
-  const upload = multer()
 
   // middlewares를 사용해 라우터 구성
-  router.post('/', upload.none(), authenticateUser, ...middlewares, createTransaction)
+  router.post('/', authenticateUser, ...middlewares, createTransaction)
 
   return router
 }
