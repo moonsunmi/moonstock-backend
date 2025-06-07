@@ -7,7 +7,9 @@ import fs from 'fs'
 const prisma = new PrismaClient()
 const results = []
 
-fs.createReadStream('stock_list.csv', {encoding: 'utf-8'})
+const csvPath = new URL('./stock_list.csv', import.meta.url).pathname
+
+fs.createReadStream(csvPath, {encoding: 'utf-8'})
   .pipe(parse({delimiter: ',', from_line: 2, bom: true}))
   .on('data', data => {
     const stockData = {
